@@ -42,18 +42,37 @@ async function getTabsToMove(tabs) {
 async function moveTabsToWindow(currentWindow, targetWindowId) {
   const currentTabs = await chrome.tabs.query({ windowId: currentWindow.id });
   const tabsToMove = await getTabsToMove(currentTabs);
+
   if (tabsToMove.length === 0) return;
+
+  // Get cleanup preferences
+  const { cleanSourceSpeedDial, cleanDestSpeedDial } =
+    await chrome.storage.sync.get({
+      cleanSourceSpeedDial: false,
+      cleanDestSpeedDial: false
+    });
+
   if (targetWindowId === 'new') {
     const newWindow = await chrome.windows.create({
       focused: true,
     });
     targetWindowId = newWindow.id;
   }
+
+  // Move all tabs to target window
   const tabIds = tabsToMove.map(tab => tab.id);
   await chrome.tabs.move(tabIds, {
     windowId: targetWindowId,
     index: -1,
   });
+
+  // Clean up speed dial tabs if enabled
+  if (cleanSourceSpeedDial) {
+    await cleanupSpeedDialTabs(currentWindow.id);
+  }
+  if (cleanDestSpeedDial) {
+    await cleanupSpeedDialTabs(targetWindowId);
+  }
 }
 
 async function handleTabMove(currentWindow, targetWindowId) {
@@ -63,6 +82,17 @@ async function handleTabMove(currentWindow, targetWindowId) {
   } catch (error) {
     console.error('Error during tab movement:', error);
     alert('Error moving tabs: ' + error.message);
+  }
+}
+
+async function cleanupSpeedDialTabs(windowId) {
+  const tabs = await chrome.tabs.query({ windowId });
+  const speedDialTabs = tabs.filter(tab => tab.url.startsWith('chrome://startpage'));
+
+  // If there are multiple speed dial tabs, keep only the first one
+  if (speedDialTabs.length > 1) {
+    const tabsToClose = speedDialTabs.slice(1).map(tab => tab.id);
+    await chrome.tabs.remove(tabsToClose);
   }
 }
 
