@@ -1,0 +1,37 @@
+<svg width="128" height="128" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+  <!-- Back Window -->
+  <rect x="30" y="65" width="80" height="50" rx="4" fill="#f8f9fa" stroke="#666666" stroke-width="3"/>
+  <rect x="30" y="65" width="80" height="20" rx="4" fill="#e9ecef" stroke="#666666" stroke-width="3"/>
+  <circle cx="45" cy="75" r="3" fill="#666666"/>
+  <circle cx="55" cy="75" r="3" fill="#666666"/>
+  <circle cx="65" cy="75" r="3" fill="#666666"/>
+  
+  <!-- Front Window -->
+  <rect x="18" y="15" width="80" height="50" rx="4" fill="#f8f9fa" stroke="#666666" stroke-width="3"/>
+  <rect x="18" y="15" width="80" height="20" rx="4" fill="#e9ecef" stroke="#666666" stroke-width="3"/>
+  <circle cx="33" cy="25" r="3" fill="#666666"/>
+  <circle cx="43" cy="25" r="3" fill="#666666"/>
+  <circle cx="53" cy="25" r="3" fill="#666666"/>
+  
+  <!-- Tabs in front window -->
+  <rect x="23" y="40" width="30" height="16" rx="3" fill="#4285f4"/>
+  <rect x="55" y="40" width="30" height="16" rx="3" fill="#4285f4"/>
+  
+  <!-- Large Curved Arrow with tail (dark green outline) -->
+  <path d="M 55 45 C 70 45, 85 55, 85 80 
+           M 77 72 L 85 80 L 93 72" 
+        stroke="#006600" 
+        stroke-width="8" 
+        fill="none"
+        stroke-linecap="round"
+        stroke-linejoin="round"/>
+        
+  <!-- Large Curved Arrow with tail (bright green) -->
+  <path d="M 55 45 C 70 45, 85 55, 85 80 
+           M 77 72 L 85 80 L 93 72" 
+        stroke="#00bb00" 
+        stroke-width="6" 
+        fill="none"
+        stroke-linecap="round"
+        stroke-linejoin="round"/>
+</svg> 
