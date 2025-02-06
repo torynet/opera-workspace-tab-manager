@@ -1,6 +1,6 @@
 # Workspace Tab Manager
 
-A browser extension for Opera that lets you quickly move all tabs from one window to another, making it easier to reorganize entire workspaces across different screens or windows.
+A browser extension for Opera that helps manage tabs across windows and workspaces.
 
 ## Why Opera?
 
@@ -47,3 +47,15 @@ While Opera already has excellent workspace management for organizing tabs, this
 2. Open Opera and navigate to `opera://extensions`
 3. Enable "Developer mode"
 4. Click "Load unpacked" and select the extension directory
+
+## Tips
+
+### Fixing Incorrect Workspace Moves
+If you accidentally move tabs to the wrong workspace (because that workspace was active in the target window), you can fix this using Opera's built-in workspace features:
+1. Select the misplaced tabs:
+   - Hold Shift and click to select a range of tabs, or
+   - Hold Ctrl (or Cmd on Mac) and click to select specific tabs
+2. Right-click any selected tab
+3. Choose "Move to workspace" and select the correct workspace
+
+This is a standard Opera feature that works independently of this extension.
