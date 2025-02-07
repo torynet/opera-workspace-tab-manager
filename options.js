@@ -13,7 +13,7 @@ function saveOptions() {
     preserveWorkspaces,
     cleanSourceSpeedDial,
     cleanDestSpeedDial,
-    undoTimeout: undoTimeout ? parseInt(undoTimeout) : 0
+    undoTimeout: undoTimeout === '' ? null : parseInt(undoTimeout)
   });
 }
 
@@ -25,14 +25,14 @@ function restoreOptions() {
     preserveWorkspaces: false,
     cleanSourceSpeedDial: false,
     cleanDestSpeedDial: false,
-    undoTimeout: 30
+    undoTimeout: null
   }, (items) => {
     document.getElementById('debugMode').checked = items.debugMode;
     document.getElementById('leaveSpeedDial').checked = items.leaveSpeedDial;
     document.getElementById('preserveWorkspaces').checked = items.preserveWorkspaces;
     document.getElementById('cleanSourceSpeedDial').checked = items.cleanSourceSpeedDial;
     document.getElementById('cleanDestSpeedDial').checked = items.cleanDestSpeedDial;
-    document.getElementById('undoTimeout').value = items.undoTimeout;
+    document.getElementById('undoTimeout').value = items.undoTimeout ?? '';
   });
 }
 
