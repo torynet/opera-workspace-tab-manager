@@ -17,6 +17,7 @@ While Opera already has excellent workspace management for organizing tabs, this
 - Create a new window with all current tabs
 - Hover over window options to preview their tabs
 - Optional: Ignore Speed Dial tabs completely when moving tabs
+- Single-step restore of previous window state if you make a mistake
 
 ## Usage
 

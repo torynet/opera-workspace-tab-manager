@@ -50,10 +50,37 @@
         background-color: #a5d6a7;  /* Lighter green on hover */
         transition: background-color 0.2s;
       }
+      /* Undo button style */
+      .undo-option {
+        padding: 12px;
+        margin: 6px;
+        cursor: pointer;
+        border: none;
+        border-radius: 4px;
+        background-color: #ff9800;  /* Orange color */
+        font-size: 14px;
+        font-weight: bold;
+        color: #333;
+        text-align: center;
+      }
+      .undo-option:hover {
+        background-color: #ffa726;  /* Lighter orange on hover */
+        transition: background-color 0.2s;
+      }
+      .undo-option.disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+        opacity: 0.7;
+      }
     </style>
   </head>
   <body>
     <div id="windowList"></div>
+    <div id="undoSection" style="display: none;">
+      <div class="undo-option">
+        Undo
+      </div>
+    </div>
     <script src="popup.js"></script>
   </body>
 </html>

@@ -7,6 +7,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   populateWindowList(windowList, windows, currentWindow);
   addNewWindowOption(windowList, currentWindow);
+
+  // Add click handler for undo/redo button
+  document.querySelector('.undo-option').addEventListener('click', toggleMove);
+
+  // Show/hide undo button and set correct text
+  updateUndoRedoButton();
 });
 
 function populateWindowList(windowList, windows, currentWindow) {
@@ -39,19 +45,52 @@ async function getTabsToMove(tabs) {
   return tabs;
 }
 
-async function moveTabsToWindow(currentWindow, targetWindowId) {
-  const currentTabs = await chrome.tabs.query({ windowId: currentWindow.id });
-  const tabsToMove = await getTabsToMove(currentTabs);
+async function storeTabState(tabs, targetWindowId) {
+  const state = {
+    timestamp: Date.now(),
+    moves: tabs.map(tab => ({
+      tabId: tab.id,
+      sourceWindow: tab.windowId,
+      sourceIndex: tab.index,
+      targetWindow: targetWindowId,
+      targetIndex: -1
+    })),
+    isRedo: false
+  };
+  await chrome.storage.session.set({ lastMove: state });
+}
 
-  if (tabsToMove.length === 0) return;
+async function moveTabsToWindow(currentWindow, targetWindowId, tabIds) {
+  const start = performance.now();
 
-  // Get cleanup preferences
-  const { cleanSourceSpeedDial, cleanDestSpeedDial } =
-    await chrome.storage.sync.get({
-      cleanSourceSpeedDial: false,
-      cleanDestSpeedDial: false
-    });
+  // If no tabIds provided, query for tabs to move
+  if (!tabIds) {
+    const queryStart = performance.now();
+    const currentTabs = await chrome.tabs.query({ windowId: currentWindow.id });
+    const tabsToMove = await getTabsToMove(currentTabs);
+    await debugLog('Query tabs took:', performance.now() - queryStart, 'ms');
 
+    if (tabsToMove.length === 0) return;
+
+    // Check if we need to preserve the workspace
+    const { preserveWorkspaces } = await chrome.storage.sync.get({ preserveWorkspaces: false });
+    if (preserveWorkspaces && tabsToMove.length === currentTabs.length) {
+      // Create a speed dial tab in the source window
+      await chrome.tabs.create({
+        url: 'chrome://startpage',
+        windowId: currentWindow.id
+      });
+    }
+
+    tabIds = tabsToMove.map(tab => tab.id);
+
+    // Store state for undo/redo in parallel with move
+    const storeStart = performance.now();
+    storeTabState(tabsToMove, targetWindowId)  // Don't await here
+      .then(() => debugLog('Store state took:', performance.now() - storeStart, 'ms'));
+  }
+
+  const moveStart = performance.now();
   if (targetWindowId === 'new') {
     const newWindow = await chrome.windows.create({
       focused: true,
@@ -59,20 +98,12 @@ async function moveTabsToWindow(currentWindow, targetWindowId) {
     targetWindowId = newWindow.id;
   }
 
-  // Move all tabs to target window
-  const tabIds = tabsToMove.map(tab => tab.id);
   await chrome.tabs.move(tabIds, {
     windowId: targetWindowId,
     index: -1,
   });
-
-  // Clean up speed dial tabs if enabled
-  if (cleanSourceSpeedDial) {
-    await cleanupSpeedDialTabs(currentWindow.id);
-  }
-  if (cleanDestSpeedDial) {
-    await cleanupSpeedDialTabs(targetWindowId);
-  }
+  await debugLog('Move tabs took:', performance.now() - moveStart, 'ms');
+  await debugLog('Total operation took:', performance.now() - start, 'ms');
 }
 
 async function handleTabMove(currentWindow, targetWindowId) {
@@ -129,4 +160,65 @@ function addNewWindowOption(windowList, currentWindow) {
     handleTabMove(currentWindow, 'new')
   );
   windowList.appendChild(newWindowDiv);
+}
+
+async function toggleMove() {
+  const { lastMove } = await chrome.storage.session.get('lastMove');
+  if (!lastMove) return;
+
+  const start = performance.now();
+  const getStart = performance.now();
+  await debugLog('Get state took:', performance.now() - getStart, 'ms');
+
+  try {
+    const tabIds = lastMove.moves.map(move => move.tabId);
+    const targetWindowId = lastMove.isRedo ? lastMove.moves[0].targetWindow : lastMove.moves[0].sourceWindow;
+
+    // Use the same move mechanism
+    await moveTabsToWindow(null, targetWindowId, tabIds);
+
+    // Update undo/redo state
+    const updateStart = performance.now();
+    await chrome.storage.session.set({
+      lastMove: { ...lastMove, isRedo: !lastMove.isRedo }
+    });
+    await debugLog('Update storage took:', performance.now() - updateStart, 'ms');
+
+    updateUndoRedoButton();
+  } catch (error) {
+    console.error('Error during move:', error);
+    alert(`Error ${lastMove.isRedo ? 'redoing' : 'undoing'} move: ${error.message}`);
+  }
+}
+
+function updateUndoRedoButton() {
+  chrome.storage.sync.get({ undoTimeout: 30 }, async ({ undoTimeout }) => {
+    const { lastMove } = await chrome.storage.session.get('lastMove');
+    const undoSection = document.getElementById('undoSection');
+    const undoButton = document.querySelector('.undo-option');
+
+    // Check if we have a valid state that hasn't timed out
+    const isValid = lastMove && (!undoTimeout || (Date.now() - lastMove.timestamp < undoTimeout * 1000));
+
+    if (isValid) {
+      undoSection.style.display = 'block';
+      undoButton.classList.remove('disabled');
+      undoButton.textContent = lastMove.isRedo ? 'Redo' : 'Undo';
+    } else {
+      // Clear old state if it exists
+      if (lastMove) {
+        chrome.storage.session.remove('lastMove');
+      }
+      undoButton.classList.add('disabled');
+      undoSection.style.display = 'block';
+      undoButton.textContent = 'Undo';
+    }
+  });
+}
+
+async function debugLog(...args) {
+  chrome.runtime.sendMessage({
+    type: 'debugLog',
+    args: args
+  });
 }
