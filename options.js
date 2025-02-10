@@ -1,18 +1,10 @@
 // Saves options to chrome.storage
 function saveOptions() {
-  const debugMode = document.getElementById('debugMode').checked;
-  const leaveSpeedDial = document.getElementById('leaveSpeedDial').checked;
-  const preserveWorkspaces = document.getElementById('preserveWorkspaces').checked;
-  const cleanSourceSpeedDial = document.getElementById('cleanSourceSpeedDial').checked;
-  const cleanDestSpeedDial = document.getElementById('cleanDestSpeedDial').checked;
   const undoTimeout = document.getElementById('undoTimeout').value;
-
   chrome.storage.sync.set({
-    debugMode,
-    leaveSpeedDial,
-    preserveWorkspaces,
-    cleanSourceSpeedDial,
-    cleanDestSpeedDial,
+    debugMode: document.getElementById('debugMode').checked,
+    preserveWorkspaces: document.getElementById('preserveWorkspaces').checked,
+    cleanSpeedDials: document.getElementById('cleanSpeedDials').checked,
     undoTimeout: undoTimeout === '' ? null : parseInt(undoTimeout)
   });
 }
@@ -36,9 +28,22 @@ function restoreOptions() {
   });
 }
 
-document.addEventListener('DOMContentLoaded', restoreOptions);
-document.getElementById('debugMode').addEventListener('change', saveOptions);
-document.getElementById('leaveSpeedDial').addEventListener('change', saveOptions);
-document.getElementById('preserveWorkspaces').addEventListener('change', saveOptions);
-document.getElementById('cleanSourceSpeedDial').addEventListener('change', saveOptions);
-document.getElementById('cleanDestSpeedDial').addEventListener('change', saveOptions);
+document.addEventListener('DOMContentLoaded', () => {
+  // Load saved settings
+  chrome.storage.sync.get({
+    debugMode: false,
+    preserveWorkspaces: false,
+    cleanSpeedDials: false,
+    undoTimeout: null
+  }, (settings) => {
+    document.getElementById('debugMode').checked = settings.debugMode;
+    document.getElementById('preserveWorkspaces').checked = settings.preserveWorkspaces;
+    document.getElementById('cleanSpeedDials').checked = settings.cleanSpeedDials;
+    document.getElementById('undoTimeout').value = settings.undoTimeout ?? '';
+  });
+
+  // Add change handlers
+  document.querySelectorAll('input').forEach(input => {
+    input.addEventListener('change', saveOptions);
+  });
+});

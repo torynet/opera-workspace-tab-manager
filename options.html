@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <title>Workspace Tab Manager Options</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <style>
     body {
       padding: 20px;
@@ -38,43 +39,39 @@
       align-items: center;
       gap: 8px;
     }
+    .info-icon::after {
+      font-family: 'Material Icons', sans-serif;
+      content: " info";
+      font-size: 16px;
+      color: #666;
+      cursor: help;
+      vertical-align: middle;
+    }
   </style>
 </head>
 <body>
   <div class="option-row">
     <label>
+      <input type="checkbox" id="preserveWorkspaces">
+      Add Speed Dials to Preserve Emptied Workspaces
+    </label>
+  </div>
+  <div class="option-row">
+    <label title="Keeps only one Speed Dial tab per touched window" class="info-icon">
+      <input type="checkbox" id="cleanSpeedDials">
+      Clean Up Duplicate Speed Dials
+    </label>
+  </div>
+  <div class="option-row">
+    <label title="0 = now, blank = never" class="info-icon">
+      <input type="number" id="undoTimeout" min="0" step="1">
+      Undo/Redo Timeout Seconds
+    </label>
+  </div>
+  <div class="option-row">
+    <label>
       <input type="checkbox" id="debugMode">
       Enable Debug Logging
-    </label>
-  </div>
-  <div class="option-row">
-    <label>
-      <input type="checkbox" id="leaveSpeedDial">
-      Ignore Speed Dial Tabs
-    </label>
-  </div>
-  <div class="option-row">
-    <label>
-      <input type="checkbox" id="cleanSourceSpeedDial">
-      Clean up Speed Dial tabs in source window
-    </label>
-  </div>
-  <div class="option-row">
-    <label>
-      <input type="checkbox" id="cleanDestSpeedDial">
-      Clean up Speed Dial tabs in destination window
-    </label>
-  </div>
-  <div class="option-row">
-    <label>
-      <input type="checkbox" id="preserveWorkspaces">
-      Add Speed Dial to preserve empty workspaces
-    </label>
-  </div>
-  <div class="option-row">
-    <label>
-      <input type="number" id="undoTimeout" min="0" step="1">
-      Undo/Redo Timeout (seconds, blank for no timeout, 0 for immediate clear)
     </label>
   </div>
   <script src="options.js"></script>
