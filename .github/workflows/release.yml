@@ -42,7 +42,7 @@ jobs:
 
       - name: Check required files
         run: |
-          REQUIRED_FILES=("manifest.json" "popup.html" "popup.js" "background.js" "options.html" "options.js")
+          REQUIRED_FILES=("manifest.json" "popup.html" "popup.js" "background.js" "options.html" "options.js" "persona.ini")
           for file in "${REQUIRED_FILES[@]}"; do
             if [ ! -f "$file" ]; then
               echo "Error: Required file $file is missing"
@@ -75,7 +75,7 @@ jobs:
           if [ "$IS_PRERELEASE" = "true" ]; then
             PRERELEASE_FLAG="--prerelease"
           fi
-          
+
           # Create release and upload asset in one step
           gh release create ${{ github.ref_name }} \
             workspace-tab-manager-v$VERSION.zip \
