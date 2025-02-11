@@ -8,6 +8,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
@@ -76,11 +78,16 @@ jobs:
             PRERELEASE_FLAG="--prerelease"
           fi
 
-          # Create release and upload asset in one step
+          # Try to get release notes, use default message if not found
+          RELEASE_NOTES=$(jq -r --arg ver "$TAG_BASE_VERSION" \
+            'if .release_notes[$ver] then .release_notes[$ver].changes[] else empty end' \
+            metadata.json 2>/dev/null | sed 's/^/- /' || echo "- Release version $VERSION")
+
+          # Create release and upload asset
           gh release create ${{ github.ref_name }} \
             workspace-tab-manager-v$VERSION.zip \
             --title "Version $VERSION" \
-            --notes "$(jq -r '.release_notes["'$TAG_BASE_VERSION'"].changes[]' metadata.json | sed 's/^/- /')" \
+            --notes "$RELEASE_NOTES" \
             $PRERELEASE_FLAG
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
