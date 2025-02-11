@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Get settings first
   window.settings = await getSettings();
   debugLog('Settings:', window.settings);
-  debugLog('LogBasics');
+  debugLog('LogWindowInfo');
   const windowList = document.getElementById("windowList");
   const windows = await chrome.windows.getAll({ populate: true });
   const currentWindow = await chrome.windows.getCurrent();

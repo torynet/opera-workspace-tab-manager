@@ -3,7 +3,7 @@ let debugMode = false;
 
 // Initialize on load
 initDebugSettings();
-logBasics();
+logWindowInfo();
 
 // Listen for settings changes
 chrome.storage.onChanged.addListener((changes, namespace) => {
@@ -28,8 +28,8 @@ async function debugLog(...args) {
     const [first, ...rest] = args;
 
     // Handle special commands first
-    if (first === 'LogBasics') {
-      logBasics();
+    if (first === 'LogWindowInfo') {
+      logWindowInfo();
       return;
     }
 
@@ -54,18 +54,8 @@ async function initDebugSettings() {
   const { debugMode: mode } = await chrome.storage.sync.get({ debugMode: false });
   debugMode = mode;
 }
-async function logBasics(){
-  if (!debugMode) return;
-  logAvailableAPIs();
-  logWindowInfo();
-}
-function logAvailableAPIs() {
-  console.log('Available chrome APIs:', Object.keys(chrome));
-  if (typeof opera !== 'undefined') {
-    console.log('Available opera APIs:', Object.keys(opera));
-  }
-}
 async function logWindowInfo(){
+  if (!debugMode) return;
   const currWindow = await chrome.windows.getCurrent();
   debugLog('Current window:', currWindow);
 }
