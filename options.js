@@ -6,6 +6,7 @@ function saveOptions() {
     preserveWorkspaces: document.getElementById('preserveWorkspaces').checked,
     ignoreSpeedDials: document.getElementById('ignoreSpeedDials').checked,
     cleanSpeedDials: document.getElementById('cleanSpeedDials').checked,
+    focusDestination: document.getElementById('focusDestination').checked,
     undoTimeout: undoTimeout === '' ? null : parseInt(undoTimeout)
   });
 }
@@ -17,12 +18,14 @@ function restoreOptions() {
     preserveWorkspaces: false,
     ignoreSpeedDials: true,
     cleanSpeedDials: false,
+    focusDestination: true,
     undoTimeout: null
   }, (items) => {
     document.getElementById('debugMode').checked = items.debugMode;
     document.getElementById('preserveWorkspaces').checked = items.preserveWorkspaces;
     document.getElementById('ignoreSpeedDials').checked = items.ignoreSpeedDials;
     document.getElementById('cleanSpeedDials').checked = items.cleanSpeedDials;
+    document.getElementById('focusDestination').checked = items.focusDestination;
     document.getElementById('undoTimeout').value = items.undoTimeout ?? '';
   });
 }
@@ -34,12 +37,14 @@ document.addEventListener('DOMContentLoaded', () => {
     preserveWorkspaces: false,
     ignoreSpeedDials: true,
     cleanSpeedDials: false,
+    focusDestination: true,
     undoTimeout: null
   }, (settings) => {
     document.getElementById('debugMode').checked = settings.debugMode;
     document.getElementById('preserveWorkspaces').checked = settings.preserveWorkspaces;
     document.getElementById('ignoreSpeedDials').checked = settings.ignoreSpeedDials;
     document.getElementById('cleanSpeedDials').checked = settings.cleanSpeedDials;
+    document.getElementById('focusDestination').checked = settings.focusDestination;
     document.getElementById('undoTimeout').value = settings.undoTimeout ?? '';
   });
 

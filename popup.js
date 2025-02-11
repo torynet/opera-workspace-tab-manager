@@ -91,6 +91,9 @@ function addNewWindowOption(windowList, currentWindow) {
   });
   windowList.appendChild(div);
 }
+
+
+// UI Updates
 function updateUndoRedoButton() {
   const undoSection = document.getElementById('undoSection');
   const undoButton = document.querySelector('.undo-option');
@@ -141,6 +144,7 @@ async function handleTargetWindowSelection(currentWindow, targetWindowId) {
     const tabsToMove = await resolveTabsToMove(currentWindow.id);
     await moveTabsToWindow(currentWindow.id, tabsToMove, destinationWindowId);
     await cleanupSpeedDialTabsIfEnabled(currentWindow.id, destinationWindowId);
+    await focusDestinationIfEnabled(destinationWindowId);
     closePopupIfNeeded();
   } catch (error) {
     console.error('Error during tab movement:', error);
@@ -162,7 +166,7 @@ async function handleUndoToggle() {
     await preserveWorkspaceIfEnabledAndNeeded(lastMove.sourceWindowId);
     await reverseLastMove(lastMove);
     await cleanupSpeedDialTabsIfEnabled(lastMove.sourceWindowId, lastMove.targetWindowId);
-
+    await focusDestinationIfEnabled(lastMove.isRedo ? lastMove.targetWindowId : lastMove.sourceWindowId);
     closePopupIfNeeded();
   } catch (error) {
     console.error('Error during move:', error);
@@ -283,11 +287,17 @@ function closePopupIfNeeded() {
     window.close();
   }
 }
+async function focusDestinationIfEnabled(windowId) {
+  if (window.settings.focusDestination) {
+    await chrome.windows.update(windowId, { focused: true });
+  }
+}
 async function getSettings() {
   const settings = await chrome.storage.sync.get({
     preserveWorkspaces: false,
     ignoreSpeedDials: true,
     cleanSpeedDials: false,
+    focusDestination: true,
     undoRedoTimeout: 30,
     debugMode: false
   });
