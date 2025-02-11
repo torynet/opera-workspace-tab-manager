@@ -4,6 +4,7 @@ function saveOptions() {
   chrome.storage.sync.set({
     debugMode: document.getElementById('debugMode').checked,
     preserveWorkspaces: document.getElementById('preserveWorkspaces').checked,
+    ignoreSpeedDials: document.getElementById('ignoreSpeedDials').checked,
     cleanSpeedDials: document.getElementById('cleanSpeedDials').checked,
     undoTimeout: undoTimeout === '' ? null : parseInt(undoTimeout)
   });
@@ -13,17 +14,15 @@ function saveOptions() {
 function restoreOptions() {
   chrome.storage.sync.get({
     debugMode: false,
-    leaveSpeedDial: true,
     preserveWorkspaces: false,
-    cleanSourceSpeedDial: false,
-    cleanDestSpeedDial: false,
+    ignoreSpeedDials: true,
+    cleanSpeedDials: false,
     undoTimeout: null
   }, (items) => {
     document.getElementById('debugMode').checked = items.debugMode;
-    document.getElementById('leaveSpeedDial').checked = items.leaveSpeedDial;
     document.getElementById('preserveWorkspaces').checked = items.preserveWorkspaces;
-    document.getElementById('cleanSourceSpeedDial').checked = items.cleanSourceSpeedDial;
-    document.getElementById('cleanDestSpeedDial').checked = items.cleanDestSpeedDial;
+    document.getElementById('ignoreSpeedDials').checked = items.ignoreSpeedDials;
+    document.getElementById('cleanSpeedDials').checked = items.cleanSpeedDials;
     document.getElementById('undoTimeout').value = items.undoTimeout ?? '';
   });
 }
@@ -33,11 +32,13 @@ document.addEventListener('DOMContentLoaded', () => {
   chrome.storage.sync.get({
     debugMode: false,
     preserveWorkspaces: false,
+    ignoreSpeedDials: true,
     cleanSpeedDials: false,
     undoTimeout: null
   }, (settings) => {
     document.getElementById('debugMode').checked = settings.debugMode;
     document.getElementById('preserveWorkspaces').checked = settings.preserveWorkspaces;
+    document.getElementById('ignoreSpeedDials').checked = settings.ignoreSpeedDials;
     document.getElementById('cleanSpeedDials').checked = settings.cleanSpeedDials;
     document.getElementById('undoTimeout').value = settings.undoTimeout ?? '';
   });

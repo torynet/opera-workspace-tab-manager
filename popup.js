@@ -1,7 +1,13 @@
+const SPEED_DIAL_URL = 'chrome://startpage';
+let workspacePreservationTabId = null;
+
+
 // This is loading the popup
 document.addEventListener("DOMContentLoaded", async () => {
   // Get settings first
   window.settings = await getSettings();
+  debugLog('Settings:', window.settings);
+  debugLog('LogBasics');
   const windowList = document.getElementById("windowList");
   const windows = await chrome.windows.getAll({ populate: true });
   const currentWindow = await chrome.windows.getCurrent();
@@ -83,8 +89,9 @@ function updateUndoRedoButton() {
 async function handleTargetWindowSelection(currentWindow, targetWindowId) {
   try {
     const destinationWindowId = await resolveDestinationWindow(targetWindowId);
-    await moveTabsToWindow(currentWindow.id, destinationWindowId);
-    await preserveWorkspaceIfEnabled(currentWindow.id);
+    await preserveWorkspaceIfEnabledAndNeeded(currentWindow.id);
+    const tabsToMove = await resolveTabsToMove(currentWindow.id);
+    await moveTabsToWindow(currentWindow.id, tabsToMove, destinationWindowId);
     await cleanupSpeedDialTabsIfEnabled(currentWindow.id, destinationWindowId);
     closePopupIfNeeded();
   } catch (error) {
@@ -99,12 +106,8 @@ async function handleUndoToggle() {
   const lastMove = await getLastMove();
   if (!lastMove) return;
   try {
-    if (lastMove.isRedo) {
-      await redoLastMove(lastMove);
-    } else {
-      await undoLastMove(lastMove);
-    }
-    await preserveWorkspaceIfEnabled(lastMove.sourceWindowId);
+    await preserveWorkspaceIfEnabledAndNeeded(lastMove.sourceWindowId);
+    await reverseLastMove(lastMove);
     await cleanupSpeedDialTabsIfEnabled(lastMove.sourceWindowId, lastMove.targetWindowId);
     closePopupIfNeeded();
   } catch (error) {
@@ -112,23 +115,35 @@ async function handleUndoToggle() {
     alert(`Error ${lastMove.isRedo ? 'redoing' : 'undoing'} window contents move: ${error.message}`);
   }
 }
-async function undoLastMove(lastMove) {
-  await moveTabsToWindow(lastMove.targetWindowId, lastMove.sourceWindowId);
-  await markMoveAsRedone(lastMove);
-}
-async function redoLastMove(lastMove) {
-  await moveTabsToWindow(lastMove.sourceWindowId, lastMove.targetWindowId);
-  await markMoveAsUndone(lastMove);
+async function reverseLastMove(lastMove) {
+  const tabsToMove = await resolveTabsToMove(lastMove.isRedo ? lastMove.sourceWindowId : lastMove.targetWindowId);
+  await moveTabsToWindow(
+    lastMove.isRedo ? lastMove.sourceWindowId : lastMove.targetWindowId,
+    tabsToMove,
+    lastMove.isRedo ? lastMove.targetWindowId : lastMove.sourceWindowId
+  );
+  await chrome.storage.session.set({
+    lastMove: {
+      ...lastMove,
+      isRedo: !lastMove.isRedo,
+      timestamp: Date.now()
+    }
+  });
 }
 
-// This is where the real action takes place. Moving tabs.
-async function moveTabsToWindow(sourceWindowId, targetWindowId) {
-  const start = performance.now();
-  // Get all tabs from source window
+
+// This is where the real action takes place. Selecting & moving tabs.
+async function resolveTabsToMove(sourceWindowId) {
   const sourceTabs = await chrome.tabs.query({ windowId: sourceWindowId });
-  if (sourceTabs.length === 0) return;
-  // Move all tabs
-  await chrome.tabs.move(sourceTabs.map(t => t.id), {
+  return sourceTabs.filter(tab =>
+    tab.id !== workspacePreservationTabId
+    &&
+    (window.settings.ignoreSpeedDials ? !tab.url.startsWith(SPEED_DIAL_URL) : true)
+  );
+}
+async function moveTabsToWindow(sourceWindowId, tabsToMove, targetWindowId) {
+  if (tabsToMove.length === 0) return;
+  await chrome.tabs.move(tabsToMove.map(t => t.id), {
     windowId: targetWindowId,
     index: -1
   });
@@ -160,16 +175,6 @@ async function storeMove(sourceWindowId, targetWindowId) {
     }
   });
 }
-async function markMoveAsRedone(lastMove) {
-  await chrome.storage.session.set({
-    lastMove: { ...lastMove, isRedo: true }
-  });
-}
-async function markMoveAsUndone(lastMove) {
-  await chrome.storage.session.set({
-    lastMove: { ...lastMove, isRedo: false }
-  });
-}
 
 
 // These are helpers
@@ -180,27 +185,36 @@ async function resolveDestinationWindow(targetWindowId) {
   }
   return targetWindowId;
 }
-async function preserveWorkspaceIfEnabled(windowId) {
+async function preserveWorkspaceIfEnabledAndNeeded(windowId) {
   if (window.settings.preserveWorkspaces) {
-    await chrome.tabs.create({
-      url: 'chrome://startpage',
-      windowId: windowId
-    });
+    const tabs = await chrome.tabs.query({ windowId: windowId });
+    const hasSpeedDial = tabs.some(tab => tab.url.startsWith(SPEED_DIAL_URL));
+    if (!hasSpeedDial) {
+      const tab = await chrome.tabs.create({
+        url: SPEED_DIAL_URL,
+        windowId: windowId
+      });
+      workspacePreservationTabId = tab.id;
+    }
   }
 }
 async function cleanupSpeedDialTabsIfEnabled(sourceWindowId, targetWindowId) {
   if (window.settings.cleanSpeedDials) {
-    // Clean source window
     const sourceTabs = await chrome.tabs.query({ windowId: sourceWindowId });
-    const sourceSpeedDials = sourceTabs.filter(tab => tab.url.startsWith('chrome://startpage'));
+    const sourceSpeedDials = sourceTabs.filter(tab =>
+      tab.url.startsWith(SPEED_DIAL_URL) &&
+      tab.id !== workspacePreservationTabId
+    );
     if (sourceSpeedDials.length > 1) {
       const tabsToClose = sourceSpeedDials.slice(1).map(tab => tab.id);
       await chrome.tabs.remove(tabsToClose);
     }
-    // Clean target window if it exists
     if (targetWindowId !== 'new') {
       const destTabs = await chrome.tabs.query({ windowId: targetWindowId });
-      const destSpeedDials = destTabs.filter(tab => tab.url.startsWith('chrome://startpage'));
+      const destSpeedDials = destTabs.filter(tab =>
+        tab.url.startsWith(SPEED_DIAL_URL) &&
+        tab.id !== workspacePreservationTabId
+      );
       if (destSpeedDials.length > 1) {
         const tabsToClose = destSpeedDials.slice(1).map(tab => tab.id);
         await chrome.tabs.remove(tabsToClose);
@@ -216,17 +230,16 @@ function closePopupIfNeeded() {
 async function getSettings() {
   const settings = await chrome.storage.sync.get({
     preserveWorkspaces: false,
+    ignoreSpeedDials: true,
     cleanSpeedDials: false,
     undoRedoTimeout: 30,
-    enableDebugLogging: false
+    debugMode: false
   });
-  if (settings.enableDebugLogging) {
-    debugLog('Settings retrieved:', settings);
-  }
+  console.log('Settings retrieved:', settings);
   return settings;
 }
 async function debugLog(...args) {
-  if (window.settings.enableDebugLogging) {
+  if (window.settings.debugMode) {
     chrome.runtime.sendMessage({
       type: 'debugLog',
       args: args
