@@ -1,11 +1,11 @@
-// Cache debug settings at startup
+// Cache debug options at startup
 let debugMode = false;
 
 // Initialize on load
-initDebugSettings();
+initDebugOption();
 logWindowInfo();
 
-// Listen for settings changes
+// Listen for options changes
 chrome.storage.onChanged.addListener((changes, namespace) => {
   if (namespace === 'sync' && changes.debugMode) {
     debugMode = changes.debugMode.newValue;
@@ -22,6 +22,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     debugLog(...message.args);
   }
 });
+
 // Actually log
 async function debugLog(...args) {
   if (debugMode) {
@@ -50,7 +51,7 @@ async function debugLog(...args) {
 }
 
 // Helpers
-async function initDebugSettings() {
+async function initDebugOption() {
   const { debugMode: mode } = await chrome.storage.sync.get({ debugMode: false });
   debugMode = mode;
 }

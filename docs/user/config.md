@@ -7,18 +7,22 @@
 
 ## Configuration Options
 
-![Settings Panel](../images/settings.png)
+![Options Panel](../images/options.png)
 
 ### Speed Dial Handling
 
-- **Add Speed Dials Tabs to Preserve Emptied Workspaces**: When enabled, creates a new speed dial tab in the active workspace, before moving tabs out of the workspace, so that the workspace is maintained when the tabs are moved, rather than immediately closing
+- **Add Speed Dials Tabs to Preserve Emptied Workspaces**: Creates a new speed dial tab in the active workspace before moving tabs out, preserving the workspace
   - Helps maintain workspace identity
   - Prevents window closure when moving all tabs
-  - Default: Enabled
-- **Ignore Speed Dial Tabs When Moving**: When enabled, ignores speed dial tabs when moving tabs, so that they are not moved
-  - Default: Enabled
-- **Clean Up Duplicate Speed Dial Tabs**: When enabled, cleans up duplicate speed dial tabs, so that only one speed dial tab is left in the original window
-  - Default: Enabled
+  - Default: ✅ Enabled
+
+- **Ignore Speed Dial Tabs When Moving**: Keeps speed dial tabs in their original window when moving tabs
+  - Prevents speed dial proliferation
+  - Default: ✅ Enabled
+
+- **Clean Up Duplicate Speed Dial Tabs**: Removes duplicate speed dial tabs after moves
+  - Keeps workspace organization clean
+  - Default: ✅ Enabled
 
 ### Undo/Redo
 
@@ -29,14 +33,16 @@
 
 - **Focus After Move**: Automatically focus the destination window after moving tabs
   - Makes workflow smoother when moving between monitors
-  - Default: Enabled
+  - Default: ✅ Enabled
 
 ### Troubleshooting
 
-- **Debug Mode**: When enabled, logs detailed information to the console
-  - Default: Disabled
+- **Debug Mode**: Logs detailed information to the console
+  - For development and troubleshooting only
+  - Default: ❌ Disabled
 
-Access these settings through:
+Access these options through:
+
 1. Right-click the extension icon
 2. Select "Options"
-3. Adjust settings as needed
+3. Adjust options as needed

@@ -10,7 +10,7 @@ flowchart TD
     subgraph Legend[Legend]
         direction TB
         Required[Required Steps]:::required
-        Optional[Optional Steps<br>based on settings]:::optional
+        Optional[Optional Steps<br>based on configuration]:::optional
     end
 
     subgraph PL[Popup Loading]

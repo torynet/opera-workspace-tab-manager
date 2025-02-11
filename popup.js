@@ -5,9 +5,9 @@ let undoCountdownInterval = null;
 
 // This is loading the popup
 document.addEventListener("DOMContentLoaded", async () => {
-  // Get settings first
-  window.settings = await getSettings();
-  debugLog('Settings:', window.settings);
+  // Get options first
+  window.options = await getOptions();
+  debugLog('Options:', window.options);
   debugLog('LogWindowInfo');
   const windowList = document.getElementById("windowList");
   const windows = await chrome.windows.getAll({ populate: true });
@@ -198,7 +198,7 @@ async function resolveTabsToMove(sourceWindowId) {
   return sourceTabs.filter(tab =>
     tab.id !== workspacePreservationTabId
     &&
-    (window.settings.ignoreSpeedDials ? !tab.url.startsWith(SPEED_DIAL_URL) : true)
+    (window.options.ignoreSpeedDials ? !tab.url.startsWith(SPEED_DIAL_URL) : true)
   );
 }
 async function moveTabsToWindow(sourceWindowId, tabsToMove, targetWindowId) {
@@ -246,7 +246,7 @@ async function resolveDestinationWindow(targetWindowId) {
   return targetWindowId;
 }
 async function preserveWorkspaceIfEnabledAndNeeded(windowId) {
-  if (window.settings.preserveWorkspaces) {
+  if (window.options.preserveWorkspaces) {
     const tabs = await chrome.tabs.query({ windowId: windowId });
     const hasSpeedDial = tabs.some(tab => tab.url.startsWith(SPEED_DIAL_URL));
     if (!hasSpeedDial) {
@@ -259,7 +259,7 @@ async function preserveWorkspaceIfEnabledAndNeeded(windowId) {
   }
 }
 async function cleanupSpeedDialTabsIfEnabled(sourceWindowId, targetWindowId) {
-  if (window.settings.cleanSpeedDials) {
+  if (window.options.cleanSpeedDials) {
     const sourceTabs = await chrome.tabs.query({ windowId: sourceWindowId });
     const sourceSpeedDials = sourceTabs.filter(tab =>
       tab.url.startsWith(SPEED_DIAL_URL) &&
@@ -288,12 +288,12 @@ function closePopupIfNeeded() {
   }
 }
 async function focusDestinationIfEnabled(windowId) {
-  if (window.settings.focusDestination) {
+  if (window.options.focusDestination) {
     await chrome.windows.update(windowId, { focused: true });
   }
 }
-async function getSettings() {
-  const settings = await chrome.storage.sync.get({
+async function getOptions() {
+  const options = await chrome.storage.sync.get({
     preserveWorkspaces: false,
     ignoreSpeedDials: true,
     cleanSpeedDials: false,
@@ -301,11 +301,11 @@ async function getSettings() {
     undoRedoTimeout: 30,
     debugMode: false
   });
-  console.log('Settings retrieved:', settings);
-  return settings;
+  console.log('Options retrieved:', options);
+  return options;
 }
 async function debugLog(...args) {
-  if (window.settings.debugMode) {
+  if (window.options.debugMode) {
     chrome.runtime.sendMessage({
       type: 'debugLog',
       args: args

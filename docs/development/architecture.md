@@ -5,8 +5,8 @@ The Workspace Tab Manager extension is built with a focus on reliable tab moveme
 ## Core Components
 
 - **Popup UI**: User interface for window selection and movement controls
-- **Background Service**: Handles logging, settings, and state management
-- **Options Page**: Configuration of all options and settings
+- **Background Service**: Makes logging easier to use for debugging
+- **Options Page**: Configuration of all extension options
 
 ## Flow Diagrams
 

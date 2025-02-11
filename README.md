@@ -16,6 +16,7 @@ Get it from the [Opera Add-ons Store](https://addons.opera.com/extensions/detail
 ## Documentation
 
 See our [documentation](docs/index.md) for:
+
 - [Installation & Configuration](docs/user/config.md)
 - [Usage Guide](docs/user/usage.md)
 - [Developer Documentation](docs/development/index.md)
