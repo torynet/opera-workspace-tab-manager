@@ -2,7 +2,7 @@
 
 A browser extension for Opera that helps manage tabs across windows and workspaces.
 
-## Why Opera?
+## Why Does This Exist?
 
 While Opera already has excellent workspace management for organizing tabs, this extension solves a specific problem: moving ALL tabs from one window to another with two clicks. This is particularly useful when you want to:
 
@@ -60,3 +60,6 @@ If you accidentally move tabs to the wrong workspace (because that workspace was
 3. Choose "Move to workspace" and select the correct workspace
 
 This is a standard Opera feature that works independently of this extension.
+
+# Tab Movement Architecture
+For a detailed view of the extension's workflow and components, see the [Architecture Diagram](ARCHITECTURE.md).
