@@ -1,5 +1,6 @@
 const SPEED_DIAL_URL = 'chrome://startpage';
 let workspacePreservationTabId = null;
+let undoCountdownInterval = null;
 
 
 // This is loading the popup
@@ -43,9 +44,20 @@ function createWindowOption(window, currentWindow, index) {
   div.title = createTabTitlesList(window);
   const tabCount = window.tabs.length;
   div.textContent = `${index}. ${getWindowDisplayName(window)} (${tabCount} ${tabCount === 1 ? 'tab' : 'tabs'})`;
-  div.addEventListener("click", () =>
-    handleTargetWindowSelection(currentWindow, window.id)
-  );
+
+  // Add progress bar
+  const progressBar = document.createElement("div");
+  progressBar.className = "progress-bar";
+  div.appendChild(progressBar);
+
+  div.addEventListener("click", async () => {
+    div.classList.add('loading');
+    try {
+      await handleTargetWindowSelection(currentWindow, window.id);
+    } finally {
+      div.classList.remove('loading');
+    }
+  });
   return div;
 }
 function createTabTitlesList(window) {
@@ -60,13 +72,24 @@ function getWindowDisplayName(window) {
     : `${window.id}`;
 }
 function addNewWindowOption(windowList, currentWindow) {
-  const newWindowDiv = document.createElement("div");
-  newWindowDiv.className = "new-window-option";
-  newWindowDiv.textContent = "New Window";
-  newWindowDiv.addEventListener("click", () =>
-    handleTargetWindowSelection(currentWindow, 'new')
-  );
-  windowList.appendChild(newWindowDiv);
+  const div = document.createElement("div");
+  div.className = "new-window-option";
+  div.textContent = "New Window";
+
+  // Add progress bar
+  const progressBar = document.createElement("div");
+  progressBar.className = "progress-bar";
+  div.appendChild(progressBar);
+
+  div.addEventListener("click", async () => {
+    div.classList.add('loading');
+    try {
+      await handleTargetWindowSelection(currentWindow, 'new');
+    } finally {
+      div.classList.remove('loading');
+    }
+  });
+  windowList.appendChild(div);
 }
 function updateUndoRedoButton() {
   const undoSection = document.getElementById('undoSection');
@@ -75,13 +98,38 @@ function updateUndoRedoButton() {
     if (lastMove) {
       undoSection.style.display = 'block';
       undoButton.classList.remove('disabled');
-      undoButton.textContent = lastMove.isRedo ? 'Redo' : 'Undo';
+      startUndoCountdown(lastMove, undoButton);
     } else {
+      clearInterval(undoCountdownInterval);
       undoButton.classList.add('disabled');
       undoSection.style.display = 'block';
       undoButton.textContent = 'Undo';
     }
   });
+}
+async function startUndoCountdown(lastMove, button) {
+  clearInterval(undoCountdownInterval);
+  const { undoTimeout } = await chrome.storage.sync.get({ undoTimeout: 30 });
+  if (!undoTimeout) {
+    button.textContent = lastMove.isRedo ? 'Redo' : 'Undo';
+    return;
+  }
+  const updateButtonText = () => {
+    const now = Date.now();
+    const elapsed = Math.floor((now - lastMove.timestamp) / 1000);
+    const remaining = Math.max(0, undoTimeout - elapsed);
+
+    if (remaining === 0) {
+      clearInterval(undoCountdownInterval);
+      button.classList.add('disabled');
+      button.textContent = 'Expired';
+      chrome.storage.session.remove('lastMove');
+    } else {
+      button.textContent = `${lastMove.isRedo ? 'Redo' : 'Undo'} (${remaining}s)`;
+    }
+  };
+  updateButtonText();
+  undoCountdownInterval = setInterval(updateButtonText, 1000);
 }
 
 
@@ -103,16 +151,24 @@ async function handleTargetWindowSelection(currentWindow, targetWindowId) {
 
 // Undo/redo handling
 async function handleUndoToggle() {
+  const undoButton = document.querySelector('.undo-option');
   const lastMove = await getLastMove();
   if (!lastMove) return;
+
   try {
+    undoButton.classList.add('loading');
+    undoButton.textContent = lastMove.isRedo ? 'Redoing...' : 'Undoing...';
+
     await preserveWorkspaceIfEnabledAndNeeded(lastMove.sourceWindowId);
     await reverseLastMove(lastMove);
     await cleanupSpeedDialTabsIfEnabled(lastMove.sourceWindowId, lastMove.targetWindowId);
+
     closePopupIfNeeded();
   } catch (error) {
     console.error('Error during move:', error);
     alert(`Error ${lastMove.isRedo ? 'redoing' : 'undoing'} window contents move: ${error.message}`);
+    undoButton.classList.remove('loading');
+    updateUndoRedoButton();
   }
 }
 async function reverseLastMove(lastMove) {
