@@ -1,0 +1,72 @@
+name: Create Release Candidate
+
+on:
+  workflow_dispatch:
+    inputs:
+      force_version:
+        description: 'Force specific version (optional, format: x.y.z)'
+        required: false
+        type: string
+
+jobs:
+  create-rc:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history for tags
+
+      - name: Determine next version
+        id: version
+        uses: ./.github/actions/version
+        with:
+          tag: $(git tag -l 'v*' --sort=-v:refname | head -n1)
+          increment: rc
+          force_version: ${{ inputs.force_version }}
+
+      - name: Create and push tag
+        run: |
+          VERSION="${{ steps.version.outputs.next_version }}"
+          git tag "v$VERSION"
+          git push origin "v$VERSION"
+
+          echo "Created and pushed tag v$VERSION"
+          echo "The release workflow will now create the release automatically."
+
+      - name: Update manifest version
+        run: |
+          VERSION="${{ steps.version.outputs.next_version }}"
+          # Update manifest.json version
+          jq --arg ver "$VERSION" '.version = $ver' manifest.json > manifest.json.tmp
+          mv manifest.json.tmp manifest.json
+
+      - name: Generate store release notes
+        run: |
+          # Get PRs since last release tag
+          PREV_VERSION=$(git tag -l 'v*-r' --sort=-v:refname | head -n1)
+          if [ -n "$PREV_VERSION" ]; then
+            RELEASE_NOTES=$(gh pr list \
+              --base main \
+              --state merged \
+              --search "merged:>=$(git log -1 --format=%aI $PREV_VERSION)" \
+              --json title \
+              --template '{{range .}}{{.title}}\n{{end}}')
+          else
+            RELEASE_NOTES="Initial release"
+          fi
+
+          # Update metadata.json with new release notes
+          jq --arg ver "$VERSION" --arg notes "$RELEASE_NOTES" \
+            '.store.opera.release_notes.versions[$ver].en = $notes' \
+            metadata.json > metadata.json.tmp
+          mv metadata.json.tmp metadata.json
+
+      - name: Commit version and release notes updates
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add manifest.json metadata.json
+          git commit -m "chore: bump version and update release notes for $VERSION"
+          git push origin HEAD

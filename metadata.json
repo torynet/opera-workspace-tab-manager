@@ -3,7 +3,30 @@
     "opera": {
       "url": null,
       "category": "Productivity",
-      "status": "unpublished"
+      "status": "unpublished",
+      "release_notes": {
+        "versions": {
+          "0.0.0": {
+            "en": "Window-to-window tab movement\nSpeed Dial tab handling\nUndo/redo functionality"
+          }
+        }
+      },
+      "details": {
+        "website": "https://github.com/torynet/opera-workspace-tab-manager",
+        "support": "https://github.com/torynet/opera-workspace-tab-manager/issues",
+        "keywords": ["tabs", "workspace", "productivity", "window management"],
+        "languages": ["en"],
+        "screenshots": [
+          {
+            "path": "popup.png",
+            "caption": "Main popup interface"
+          },
+          {
+            "path": "options.png",
+            "caption": "Extension options"
+          }
+        ]
+      }
     }
   },
   "repository": {
@@ -17,16 +40,5 @@
   "privacy": {
     "collects_data": false,
     "data_usage": []
-  },
-  "release_notes": {
-    "0.0.0": {
-      "date": "2025-02-12",
-      "changes": [
-        "Candidate Release",
-        "Window-to-window tab movement",
-        "Speed Dial tab handling",
-        "Undo/redo functionality"
-      ]
-    }
   }
 }

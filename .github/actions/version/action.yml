@@ -1,0 +1,83 @@
+name: 'Version Utils'
+description: 'Common version manipulation functions'
+
+inputs:
+  tag:
+    description: 'Git tag to parse'
+    required: true
+  increment:
+    description: 'Calculate next version (none|rc|release)'
+    required: false
+    default: 'none'
+  force_version:
+    description: 'Force specific version (overrides increment)'
+    required: false
+
+outputs:
+  version:
+    description: 'Version without v prefix'
+    value: ${{ steps.parse.outputs.version }}
+  is_rc:
+    description: 'True if version is RC'
+    value: ${{ steps.parse.outputs.is_rc }}
+  is_release:
+    description: 'True if version is release'
+    value: ${{ steps.parse.outputs.is_release }}
+  next_version:
+    description: 'Next version if increment specified'
+    value: ${{ steps.parse.outputs.next_version }}
+
+runs:
+  using: composite
+  steps:
+    - id: parse
+      shell: bash
+      run: |
+        TAG="${{ inputs.tag }}"
+        VERSION="${TAG#v}"
+
+        # Parse version
+        if [[ $TAG =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)(-rc([0-9]+)|(-r))?$ ]]; then
+          MAJOR="${BASH_REMATCH[1]}"
+          MINOR="${BASH_REMATCH[2]}"
+          PATCH="${BASH_REMATCH[3]}"
+          RC="${BASH_REMATCH[5]}"
+          RELEASE="${BASH_REMATCH[6]}"
+
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+          if [[ $TAG =~ -rc ]]; then
+            echo "is_rc=true" >> $GITHUB_OUTPUT
+            echo "is_release=false" >> $GITHUB_OUTPUT
+          elif [[ $TAG =~ -r ]]; then
+            echo "is_rc=false" >> $GITHUB_OUTPUT
+            echo "is_release=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_rc=false" >> $GITHUB_OUTPUT
+            echo "is_release=false" >> $GITHUB_OUTPUT
+          fi
+
+          # Calculate next version if requested
+          if [ -n "${{ inputs.force_version }}" ]; then
+            NEXT_VERSION="${{ inputs.force_version }}"
+          elif [ "${{ inputs.increment }}" = "rc" ]; then
+            if [ -n "$RELEASE" ]; then
+              # Last tag was a release, increment minor and start RC1
+              NEXT_VERSION="${MAJOR}.$(($MINOR + 1)).0-rc1"
+            elif [ -n "$RC" ]; then
+              # Last tag was an RC, increment RC number
+              NEXT_VERSION="${MAJOR}.${MINOR}.${PATCH}-rc$(($RC + 1))"
+            else
+              # Regular version, start RC1 with incremented minor
+              NEXT_VERSION="${MAJOR}.$(($MINOR + 1)).0-rc1"
+            fi
+            echo "next_version=$NEXT_VERSION" >> $GITHUB_OUTPUT
+          fi
+        else
+          if [ "${{ inputs.increment }}" = "rc" ]; then
+            echo "next_version=0.1.0-rc1" >> $GITHUB_OUTPUT
+          else
+            echo "Invalid version format: $TAG" >&2
+            exit 1
+          fi
+        fi
