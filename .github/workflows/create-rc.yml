@@ -13,7 +13,6 @@ on:
 
 jobs:
   create-rc:
-    if: github.actor != 'GitHub Actions'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -83,7 +82,7 @@ jobs:
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           git add manifest.json metadata.json persona.ini
-          git commit -m "chore: bump version and update release notes for $VERSION"
+          git commit -m "chore: bump version and update release notes for $VERSION [skip ci]"
           git push origin HEAD
 
           # Push tag separately to ensure it triggers the build workflow
