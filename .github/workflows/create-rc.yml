@@ -13,6 +13,7 @@ on:
 
 jobs:
   create-rc:
+    if: github.actor != 'github-actions[bot]'  # Skip if the push was from our workflow
     runs-on: ubuntu-latest
     permissions:
       contents: write
