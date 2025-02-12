@@ -1,8 +1,5 @@
 name: Build Extension Package
 
-permissions:
-  contents: write
-
 on:
   push:
     tags:
