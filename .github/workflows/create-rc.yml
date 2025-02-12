@@ -85,6 +85,6 @@ jobs:
           git commit -m "chore: bump version and update release notes for $VERSION [skip ci]"
           git push origin HEAD
 
-          # Push tag separately to ensure it triggers the build workflow
-          git tag "v$VERSION"
+          # Create tag without [skip ci] to ensure build workflow runs
+          git tag -a "v$VERSION" -m "Release candidate v$VERSION"
           git push origin "v$VERSION"
