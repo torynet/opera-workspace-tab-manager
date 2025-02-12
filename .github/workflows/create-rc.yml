@@ -1,6 +1,9 @@
 name: Create Release Candidate
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
     inputs:
       force_version:
