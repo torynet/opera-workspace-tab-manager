@@ -8,7 +8,11 @@ on:
       - 'v*'
 
 jobs:
+  get-version:
+    uses: ./.github/workflows/get-version.yml
+
   build:
+    needs: get-version
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -18,7 +22,7 @@ jobs:
       - uses: ./.github/actions/version
         id: version
         with:
-          tag: ${{ github.ref_name }}
+          tag: ${{ needs.get-version.outputs.version_tag }}
 
       - uses: ./.github/actions/package
         id: package

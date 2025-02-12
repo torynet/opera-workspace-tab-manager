@@ -1,0 +1,28 @@
+name: Get Version Tag
+
+on:
+  workflow_call:
+    inputs: {}
+    outputs:
+      version_tag:
+        description: "The version tag to use"
+        value: ${{ jobs.get-version.outputs.version_tag }}
+
+jobs:
+  get-version:
+    runs-on: ubuntu-latest
+    outputs:
+      version_tag: ${{ steps.get_tag.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Need full history to get latest tag
+
+      - name: Get version tag
+        id: get_tag
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            echo "tag=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          else
+            echo "tag=$(git tag -l 'v*' --sort=-v:refname | head -n1)" >> $GITHUB_OUTPUT
+          fi
