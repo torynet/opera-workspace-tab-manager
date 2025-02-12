@@ -26,15 +26,6 @@ jobs:
           increment: rc
           force_version: ${{ inputs.force_version }}
 
-      - name: Create and push tag
-        run: |
-          VERSION="${{ steps.version.outputs.next_version }}"
-          git tag "v$VERSION"
-          git push origin "v$VERSION"
-
-          echo "Created and pushed tag v$VERSION"
-          echo "The release workflow will now create the release automatically."
-
       - name: Update manifest version
         run: |
           VERSION="${{ steps.version.outputs.next_version }}"
@@ -43,6 +34,7 @@ jobs:
           mv manifest.json.tmp manifest.json
 
       - name: Generate store release notes
+        id: release_notes
         run: |
           # Get PRs since last release tag
           PREV_VERSION=$(git tag -l 'v*-r' --sort=-v:refname | head -n1)
@@ -57,16 +49,27 @@ jobs:
             RELEASE_NOTES="Initial release"
           fi
 
+          # Save release notes for GitHub release
+          echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
+          echo "$RELEASE_NOTES" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
           # Update metadata.json with new release notes
           jq --arg ver "$VERSION" --arg notes "$RELEASE_NOTES" \
             '.store.opera.release_notes.versions[$ver].en = $notes' \
             metadata.json > metadata.json.tmp
           mv metadata.json.tmp metadata.json
 
-      - name: Commit version and release notes updates
+      - name: Commit version and release notes updates, create and push tag
         run: |
+          VERSION="${{ steps.version.outputs.next_version }}"
+
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           git add manifest.json metadata.json
           git commit -m "chore: bump version and update release notes for $VERSION"
           git push origin HEAD
+
+          # Push tag separately to ensure it triggers the build workflow
+          git tag "v$VERSION"
+          git push origin "v$VERSION"
