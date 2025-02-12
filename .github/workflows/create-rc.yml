@@ -13,7 +13,7 @@ on:
 
 jobs:
   create-rc:
-    if: github.actor != 'GitHub Actions'  # Match the git config user.name
+    if: github.actor != 'GitHub Actions'
     runs-on: ubuntu-latest
     permissions:
       contents: write
