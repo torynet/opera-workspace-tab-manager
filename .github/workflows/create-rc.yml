@@ -13,6 +13,7 @@ on:
 
 jobs:
   create-rc:
+    if: github.event.head_commit.committer.name != 'GitHub Actions'  # Skip commits made by workflows
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -82,9 +83,9 @@ jobs:
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           git add manifest.json metadata.json persona.ini
-          git commit -m "chore: bump version and update release notes for $VERSION [skip ci]"
+          git commit -m "chore: Version maintenance: Sync version and update release notes for $VERSION"
           git push origin HEAD
 
-          # Create tag without [skip ci] to ensure build workflow runs
+          # Create tag on the version maintenance commit
           git tag -a "v$VERSION" -m "Release candidate v$VERSION"
           git push origin "v$VERSION"
