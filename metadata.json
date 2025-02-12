@@ -8,14 +8,24 @@
         "versions": {
           "0.0.0": {
             "en": "Window-to-window tab movement\nSpeed Dial tab handling\nUndo/redo functionality"
+          },
+          "": {
+            "en": "Initial release"
           }
         }
       },
       "details": {
         "website": "https://github.com/torynet/opera-workspace-tab-manager",
         "support": "https://github.com/torynet/opera-workspace-tab-manager/issues",
-        "keywords": ["tabs", "workspace", "productivity", "window management"],
-        "languages": ["en"],
+        "keywords": [
+          "tabs",
+          "workspace",
+          "productivity",
+          "window management"
+        ],
+        "languages": [
+          "en"
+        ],
         "screenshots": [
           {
             "path": "popup.png",
