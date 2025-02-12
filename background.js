@@ -37,15 +37,15 @@ async function debugLog(...args) {
     // Handle different types of logs
     if (typeof first === 'string') {
       if (first.includes('took:')) {
-        console.log('PERFORMANCE:', ...args);
+        console.log('PERFORMANCE:', first, ...rest);
       } else {
-        console.log('DEBUG:', ...args);
+        console.log('DEBUG:', first, ...rest);
       }
     } else if (first?.workspaceName) {
       const workspace = `[${first.workspaceName}] `;
       console.log('TAB INFO:', workspace + (first.title || first));
     } else {
-      console.log('DEBUG:', ...args);
+      console.log('DEBUG:', first, ...rest);
     }
   }
 }
