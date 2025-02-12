@@ -1,0 +1,34 @@
+name: Build Extension Package
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/version
+        id: version
+        with:
+          tag: ${{ github.ref_name }}
+
+      - uses: ./.github/actions/package
+        id: package
+        with:
+          version: ${{ steps.version.outputs.version }}
+
+      - name: Create release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create ${{ github.ref_name }} \
+            ${{ steps.package.outputs.package_name }} \
+            --title "Version ${GITHUB_REF#refs/tags/v}" \
+            --notes "Package build for ${{ github.ref_name }}" \
+            ${{ steps.version.outputs.is_rc == 'true' && '--prerelease' || '' }}

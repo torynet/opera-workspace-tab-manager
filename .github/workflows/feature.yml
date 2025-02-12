@@ -1,0 +1,93 @@
+name: Feature Branch Validation
+
+on:
+  push:
+    branches:
+      - 'feature/*'
+  pull_request:
+    branches:
+      - 'feature/*'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate manifest.json
+        id: manifest
+        continue-on-error: true
+        run: |
+          # Check if manifest.json exists and is valid JSON
+          if ! jq . manifest.json > /dev/null 2>&1; then
+            echo "::error::manifest.json is not valid JSON"
+            exit 1
+          fi
+
+          # Extract and validate version format
+          VERSION=$(jq -r .version manifest.json)
+          if ! [[ $VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9]+)?$ ]]; then
+            echo "::error::Invalid version format in manifest.json: $VERSION"
+            exit 1
+          fi
+
+      - name: Check required files
+        id: files
+        continue-on-error: true
+        run: |
+          REQUIRED_FILES=("manifest.json" "popup.html" "popup.js" "background.js" "options.html" "options.js" "persona.ini")
+          MISSING_FILES=()
+
+          for file in "${REQUIRED_FILES[@]}"; do
+            if [ ! -f "$file" ]; then
+              MISSING_FILES+=("$file")
+            fi
+          done
+
+          # Check icons
+          ICON_SIZES=("16" "48" "128")
+          for size in "${ICON_SIZES[@]}"; do
+            if [ ! -f "icons/icon${size}.png" ]; then
+              MISSING_FILES+=("icons/icon${size}.png")
+            fi
+          done
+
+          if [ ${#MISSING_FILES[@]} -ne 0 ]; then
+            echo "::error::Missing required files: ${MISSING_FILES[*]}"
+            exit 1
+          fi
+
+      - name: Validate metadata.json
+        id: metadata
+        continue-on-error: true
+        run: |
+          if ! jq . metadata.json > /dev/null 2>&1; then
+            echo "::error::metadata.json is not valid JSON"
+            exit 1
+          fi
+
+          # Validate required fields
+          REQUIRED_FIELDS=(".store.opera" ".repository" ".author" ".privacy")
+          for field in "${REQUIRED_FIELDS[@]}"; do
+            if [ "$(jq "$field" metadata.json)" == "null" ]; then
+              echo "::error::Missing required field in metadata.json: $field"
+              exit 1
+            fi
+          done
+
+      - name: Create status check
+        if: always()
+        run: |
+          STATUS="Success! All validation checks passed."
+          if  [ "${{ steps.manifest.outcome }}" != "success" ] || \
+              [ "${{ steps.files.outcome }}" != "success" ] || \
+              [ "${{ steps.metadata.outcome }}" != "success" ]; then
+            STATUS="⚠️ Some validation checks failed. See details above."
+          fi
+
+          echo "### Validation Results" >> $GITHUB_STEP_SUMMARY
+          echo "#### Manifest Validation: ${{ steps.manifest.outcome }}" >> $GITHUB_STEP_SUMMARY
+          echo "#### Required Files Check: ${{ steps.files.outcome }}" >> $GITHUB_STEP_SUMMARY
+          echo "#### Metadata Validation: ${{ steps.metadata.outcome }}" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "$STATUS" >> $GITHUB_STEP_SUMMARY

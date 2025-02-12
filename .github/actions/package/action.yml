@@ -1,0 +1,27 @@
+name: 'Package Extension'
+description: 'Creates a ZIP package of the extension'
+
+inputs:
+  version:
+    description: 'Version to use in package name'
+    required: true
+
+outputs:
+  package_name:
+    description: 'Name of the created package'
+    value: ${{ steps.package.outputs.package_name }}
+
+runs:
+  using: composite
+  steps:
+    - id: package
+      shell: bash
+      run: |
+        PACKAGE_NAME="workspace-tab-manager-${{ inputs.version }}.zip"
+        echo "package_name=$PACKAGE_NAME" >> $GITHUB_OUTPUT
+
+        zip -r "$PACKAGE_NAME" * \
+          -x "*.git*" \
+          -x "*.github*" \
+          -x "scripts*" \
+          -x "*.zip"

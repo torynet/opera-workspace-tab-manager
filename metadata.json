@@ -1,0 +1,44 @@
+{
+  "store": {
+    "opera": {
+      "url": null,
+      "category": "Productivity",
+      "status": "unpublished",
+      "release_notes": {
+        "versions": {
+          "0.0.0": {
+            "en": "Window-to-window tab movement\nSpeed Dial tab handling\nUndo/redo functionality"
+          }
+        }
+      },
+      "details": {
+        "website": "https://github.com/torynet/opera-workspace-tab-manager",
+        "support": "https://github.com/torynet/opera-workspace-tab-manager/issues",
+        "keywords": ["tabs", "workspace", "productivity", "window management"],
+        "languages": ["en"],
+        "screenshots": [
+          {
+            "path": "popup.png",
+            "caption": "Main popup interface"
+          },
+          {
+            "path": "options.png",
+            "caption": "Extension options"
+          }
+        ]
+      }
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/torynet/opera-workspace-tab-manager"
+  },
+  "author": {
+    "name": "Tory Netherton",
+    "email": "tory@netherton.me"
+  },
+  "privacy": {
+    "collects_data": false,
+    "data_usage": []
+  }
+}

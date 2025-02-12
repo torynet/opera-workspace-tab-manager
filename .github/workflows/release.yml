@@ -1,0 +1,37 @@
+name: Promote Release Candidate & Publish
+
+on:
+  workflow_dispatch:
+
+jobs:
+  promote-rc:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get latest tag
+        id: latest
+        run: echo "tag=$(git tag -l 'v*' --sort=-v:refname | head -n1)" >> $GITHUB_OUTPUT
+
+      - uses: ./.github/actions/version
+        id: version
+        with:
+          tag: ${{ steps.latest.outputs.tag }}
+
+      - name: Verify RC and create release
+        if: steps.version.outputs.is_rc != 'true'
+        run: |
+          echo "Error: Latest tag is not a release candidate"
+          exit 1
+
+      - name: Create release tag
+        run: |
+          VERSION="${{ steps.latest.outputs.tag }}"
+          RELEASE_VERSION="${VERSION%-rc*}-r"
+          git tag "$RELEASE_VERSION"
+          git push origin "$RELEASE_VERSION"
+          echo "Created release tag: $RELEASE_VERSION"

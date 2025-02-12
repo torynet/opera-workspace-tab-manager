@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Workspace Tab Manager Options</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style>
+    body {
+      padding: 20px;
+      color: #333;
+      background-color: #fff;
+    }
+    @media (prefers-color-scheme: dark) {
+      body {
+        color: #eee;
+        background-color: #333;
+      }
+      input[type="checkbox"] {
+        accent-color: #81c784;
+      }
+      input[type="number"] {
+        background-color: #444;
+        color: #eee;
+        border: 1px solid #666;
+      }
+    }
+    .option-row {
+      margin: 15px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    input[type="number"] {
+      width: 45px;
+      padding: 4px;
+      border-radius: 4px;
+    }
+    label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .info-icon::after {
+      font-family: 'Material Icons', sans-serif;
+      content: " info";
+      font-size: 16px;
+      color: #666;
+      cursor: help;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+  <h1><img src="icons/icon.svg" alt="Workspace Tab Manager" style="vertical-align: middle;" width="32" height="32"/>Workspace Tab Manager Options</h1>
+  <hr/>
+  <div class="option-row">
+    <label>
+      <input type="checkbox" id="preserveWorkspaces">
+      Add Speed Dials Tabs to Preserve Emptied Workspaces
+    </label>
+  </div>
+  <div class="option-row">
+    <label title="If you don't want to move Speed Dial tabs, you can ignore them and they will be left in the original window if not cleaned up" class="info-icon">
+      <input type="checkbox" id="ignoreSpeedDials">
+      Ignore Speed Dial Tabs When Moving
+    </label>
+  </div>
+  <div class="option-row">
+    <label title="Keeps only one Speed Dial tab per touched window" class="info-icon">
+      <input type="checkbox" id="cleanSpeedDials">
+      Clean Up Duplicate Speed Dial Tabs
+    </label>
+  </div>
+  <div class="option-row">
+    <label title="0 = now, blank = never" class="info-icon">
+      <input type="number" id="undoTimeout" min="0" step="1">
+      Undo/Redo Timeout Seconds
+    </label>
+  </div>
+  <div class="option-row">
+    <label>
+      <input type="checkbox" id="focusDestination">
+      Focus Destination Window After Move
+    </label>
+  </div>
+  <div class="option-row">
+    <label>
+      <input type="checkbox" id="debugMode">
+      Enable Debug Logging
+    </label>
+  </div>
+  <script src="options.js"></script>
+</body>
+</html>
