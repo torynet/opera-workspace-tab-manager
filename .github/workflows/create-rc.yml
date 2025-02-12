@@ -74,6 +74,8 @@ jobs:
           mv metadata.json.tmp metadata.json
 
       - name: Commit version and release notes updates, create and push tag
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           VERSION="${{ steps.version.outputs.next_version }}"
 
