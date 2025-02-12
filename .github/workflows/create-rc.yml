@@ -35,12 +35,16 @@ jobs:
           increment: rc
           force_version: ${{ inputs.force_version }}
 
-      - name: Update manifest version
+      - name: Update manifest and persona version
         run: |
           VERSION="${{ steps.version.outputs.next_version }}"
           # Update manifest.json version
           jq --arg ver "$VERSION" '.version = $ver' manifest.json > manifest.json.tmp
           mv manifest.json.tmp manifest.json
+
+          # Update persona.ini versions
+          sed -i -E 's/^Version=.*/Version='"$VERSION"'/' persona.ini
+          sed -i -E '/^\[Opera\]/,/^\[/ s/^Version=.*/Version='"$VERSION"'/' persona.ini
 
       - name: Generate store release notes
         id: release_notes
@@ -75,7 +79,7 @@ jobs:
 
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
-          git add manifest.json metadata.json
+          git add manifest.json metadata.json persona.ini
           git commit -m "chore: bump version and update release notes for $VERSION"
           git push origin HEAD
 
