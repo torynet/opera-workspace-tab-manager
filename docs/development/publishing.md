@@ -53,10 +53,12 @@ This document outlines the steps to publish the Workspace Tab Manager extension 
 
 1. Option 1: GitHub UI
    - Create and push a tag:
+
      ```bash
      git tag v1.0.0  # Use v1.0.0-beta for pre-releases
      git push origin v1.0.0
      ```
+
    - Go to [Releases page](https://github.com/torynet/opera-workspace-tab-manager/releases)
    - Click "Create release from tag"
    - Fill in release details from metadata.json
@@ -64,6 +66,7 @@ This document outlines the steps to publish the Workspace Tab Manager extension 
    - Click "Publish release"
 
 2. Option 2: GitHub CLI
+
    ```bash
    # Create and push tag
    git tag v1.0.0  # Use v1.0.0-beta for pre-releases
@@ -77,6 +80,7 @@ This document outlines the steps to publish the Workspace Tab Manager extension 
    ```
 
 The release workflow will automatically:
+
 1. Build the extension package
 2. Upload it to the release
 3. Mark as pre-release if version contains hyphen

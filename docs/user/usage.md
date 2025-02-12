@@ -2,7 +2,7 @@
 
 ## Basic Usage
 
-![Extension Popup](../images/examplepopup.png)
+![Extension Popup](../images/popup.png)
 
 1. Click the extension icon in your browser toolbar
 2. Select your desired destination window from the list
