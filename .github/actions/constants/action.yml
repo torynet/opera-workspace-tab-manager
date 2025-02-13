@@ -1,0 +1,19 @@
+name: 'Constants'
+description: 'Common constants used across actions'
+
+outputs:
+  version_pattern:
+    description: 'Regex pattern for valid version tags'
+    value: '^v([0-9]+)\.([0-9]+)\.([0-9]+)(-rc([0-9]+)|(-r))?$'
+  external_version_pattern:
+    description: 'Regex pattern for versions in external files (manifest.json, etc)'
+    value: '^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9]+)?$'
+
+runs:
+  using: composite
+  steps:
+    - id: constants
+      shell: bash
+      run: |
+        echo "version_pattern=^v([0-9]+)\.([0-9]+)\.([0-9]+)(-rc([0-9]+)|(-r))?$" >> $GITHUB_OUTPUT
+        echo "external_version_pattern=^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9]+)?$" >> $GITHUB_OUTPUT

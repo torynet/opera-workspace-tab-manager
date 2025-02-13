@@ -30,14 +30,27 @@ outputs:
 runs:
   using: composite
   steps:
+    - uses: ./.github/actions/constants
+      id: constants
+
     - id: parse
       shell: bash
       run: |
-        TAG="${{ inputs.tag }}"
+        # If input is a ref, get the latest tag
+        if [[ "${{ inputs.tag }}" == refs/* ]] || [[ -z "${{ inputs.tag }}" ]]; then
+          TAG=$(git tag -l 'v*' --sort=-v:refname | while read tag; do
+            if [[ $tag =~ ${{ steps.constants.outputs.version_pattern }} ]]; then
+              echo $tag
+              break
+            fi
+          done)
+        else
+          TAG="${{ inputs.tag }}"
+        fi
         VERSION="${TAG#v}"
 
         # Parse version
-        if [[ $TAG =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)(-rc([0-9]+)|(-r))?$ ]]; then
+        if [[ $TAG =~ ${{ steps.constants.outputs.version_pattern }} ]]; then
           MAJOR="${BASH_REMATCH[1]}"
           MINOR="${BASH_REMATCH[2]}"
           PATCH="${BASH_REMATCH[3]}"
@@ -60,24 +73,30 @@ runs:
           # Calculate next version if requested
           if [ -n "${{ inputs.force_version }}" ]; then
             NEXT_VERSION="${{ inputs.force_version }}"
+
           elif [ "${{ inputs.increment }}" = "rc" ]; then
-            if [ -n "$RELEASE" ]; then
-              # Last tag was a release, increment minor and start RC1
-              NEXT_VERSION="${MAJOR}.$(($MINOR + 1)).0-rc1"
-            elif [ -n "$RC" ]; then
-              # Last tag was an RC, increment RC number
+            if [ -n "$RC" ]; then
+              # Increment RC number: 1.0.0-rc1 -> 1.0.0-rc2
               NEXT_VERSION="${MAJOR}.${MINOR}.${PATCH}-rc$(($RC + 1))"
             else
-              # Regular version, start RC1 with incremented minor
+              # Start new RC series: 1.0.0 -> 1.1.0-rc1
               NEXT_VERSION="${MAJOR}.$(($MINOR + 1)).0-rc1"
             fi
+
+          elif [ "${{ inputs.increment }}" = "release" ]; then
+            if [ -n "$RC" ]; then
+              # Convert RC to release: 1.0.0-rc2 -> 1.0.0-r
+              NEXT_VERSION="${MAJOR}.${MINOR}.${PATCH}-r"
+            else
+              echo "Can only create release from RC version" >&2
+              exit 1
+            fi
+          fi
+
+          if [ -n "$NEXT_VERSION" ]; then
             echo "next_version=$NEXT_VERSION" >> $GITHUB_OUTPUT
           fi
         else
-          if [ "${{ inputs.increment }}" = "rc" ]; then
-            echo "next_version=0.1.0-rc1" >> $GITHUB_OUTPUT
-          else
-            echo "Invalid version format: $TAG" >&2
-            exit 1
-          fi
+          echo "Invalid version format: $TAG" >&2
+          exit 1
         fi

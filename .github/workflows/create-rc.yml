@@ -1,6 +1,9 @@
 name: Create Release Candidate
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
     inputs:
       force_version:
@@ -10,6 +13,7 @@ on:
 
 jobs:
   create-rc:
+    if: github.event.head_commit.committer.name != 'GitHub Actions'  # Skip commits made by workflows
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -17,32 +21,34 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0  # Fetch all history for tags
+          token: ${{ secrets.WORKFLOW_RECURSION_TOKEN }}
+
+      - name: Debug trigger
+        run: |
+          echo "Triggered by: ${{ github.event_name }}"
+          echo "Branch: ${{ github.ref }}"
 
       - name: Determine next version
         id: version
         uses: ./.github/actions/version
         with:
-          tag: $(git tag -l 'v*' --sort=-v:refname | head -n1)
+          tag: ${{ github.ref }}  # Just pass the ref
           increment: rc
           force_version: ${{ inputs.force_version }}
 
-      - name: Create and push tag
-        run: |
-          VERSION="${{ steps.version.outputs.next_version }}"
-          git tag "v$VERSION"
-          git push origin "v$VERSION"
-
-          echo "Created and pushed tag v$VERSION"
-          echo "The release workflow will now create the release automatically."
-
-      - name: Update manifest version
+      - name: Update manifest and persona version
         run: |
           VERSION="${{ steps.version.outputs.next_version }}"
           # Update manifest.json version
           jq --arg ver "$VERSION" '.version = $ver' manifest.json > manifest.json.tmp
           mv manifest.json.tmp manifest.json
 
+          # Update persona.ini versions
+          sed -i -E 's/^Version=.*/Version='"$VERSION"'/' persona.ini
+          sed -i -E '/^\[Opera\]/,/^\[/ s/^Version=.*/Version='"$VERSION"'/' persona.ini
+
       - name: Generate store release notes
+        id: release_notes
         run: |
           # Get PRs since last release tag
           PREV_VERSION=$(git tag -l 'v*-r' --sort=-v:refname | head -n1)
@@ -57,16 +63,29 @@ jobs:
             RELEASE_NOTES="Initial release"
           fi
 
+          # Save release notes for GitHub release
+          echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
+          echo "$RELEASE_NOTES" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
           # Update metadata.json with new release notes
           jq --arg ver "$VERSION" --arg notes "$RELEASE_NOTES" \
             '.store.opera.release_notes.versions[$ver].en = $notes' \
             metadata.json > metadata.json.tmp
           mv metadata.json.tmp metadata.json
 
-      - name: Commit version and release notes updates
+      - name: Commit version and release notes updates, create and push tag
+        env:
+          GITHUB_TOKEN: ${{ secrets.WORKFLOW_RECURSION_TOKEN }}
         run: |
+          VERSION="${{ steps.version.outputs.next_version }}"
+
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
-          git add manifest.json metadata.json
-          git commit -m "chore: bump version and update release notes for $VERSION"
+          git add manifest.json metadata.json persona.ini
+          git commit -m "chore: Version maintenance: Sync version and update release notes for $VERSION"
           git push origin HEAD
+
+          # Create tag on the version maintenance commit
+          git tag -a "v$VERSION" -m "Release candidate v$VERSION"
+          git push origin "v$VERSION"
