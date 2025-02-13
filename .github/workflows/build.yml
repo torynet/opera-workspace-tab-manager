@@ -9,21 +9,20 @@ on:
       - 'v*'
 
 jobs:
-  get-version:
-    uses: ./.github/workflows/get-version.yml
-
   build:
-    needs: get-version
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: ./.github/actions/version
         id: version
         with:
-          tag: ${{ needs.get-version.outputs.version_tag }}
+          tag: ${{ github.ref_name }}
+          increment: none
 
       - uses: ./.github/actions/package
         id: package

@@ -32,7 +32,7 @@ jobs:
         id: version
         uses: ./.github/actions/version
         with:
-          tag: $(git tag -l 'v*' --sort=-v:refname | head -n1)
+          tag: ${{ github.ref }}  # Just pass the ref
           increment: rc
           force_version: ${{ inputs.force_version }}
 
