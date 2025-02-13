@@ -33,7 +33,12 @@ runs:
     - id: parse
       shell: bash
       run: |
-        TAG="${{ inputs.tag }}"
+t latest tag
+        if [[ "${{ inputs.tag }}" == refs/* ]] || [[ -z "${{ inputs.tag }}" ]]; then
+          TAG=$(git tag -l 'v*' --sort=-v:refname | head -n1)
+        else
+          TAG="${{ inputs.tag }}"
+        fi
         VERSION="${TAG#v}"
 
         # Parse version
@@ -76,8 +81,3 @@ runs:
         else
           if [ "${{ inputs.increment }}" = "rc" ]; then
             echo "next_version=0.1.0-rc1" >> $GITHUB_OUTPUT
-          else
-            echo "Invalid version format: $TAG" >&2
-            exit 1
-          fi
-        fi
