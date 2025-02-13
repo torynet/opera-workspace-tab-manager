@@ -3,7 +3,7 @@ name: Create Release Candidate
 on:
   push:
     branches:
-      - main
+      - main  # Only trigger on main
   workflow_dispatch:
     inputs:
       force_version:
@@ -32,11 +32,11 @@ jobs:
         id: version
         uses: ./.github/actions/version
         with:
-          tag: ${{ github.ref }}  # Just pass the ref
-          increment: rc
           force_version: ${{ inputs.force_version }}
 
+      # Only proceed if we got a next version (indicates version change needed)
       - name: Update manifest and persona version
+        if: steps.version.outputs.next_version != ''
         run: |
           VERSION="${{ steps.version.outputs.next_version }}"
           # Update manifest.json version
@@ -48,6 +48,7 @@ jobs:
           sed -i -E '/^\[Opera\]/,/^\[/ s/^Version=.*/Version='"$VERSION"'/' persona.ini
 
       - name: Generate store release notes
+        if: steps.version.outputs.next_version != ''
         id: release_notes
         run: |
           # Get PRs since last release tag
@@ -75,6 +76,7 @@ jobs:
           mv metadata.json.tmp metadata.json
 
       - name: Commit version and release notes updates, create and push tag
+        if: steps.version.outputs.next_version != ''
         env:
           GITHUB_TOKEN: ${{ secrets.WORKFLOW_RECURSION_TOKEN }}
         run: |

@@ -27,7 +27,7 @@ jobs:
       - uses: ./.github/actions/package
         id: package
         with:
-          version: ${{ steps.version.outputs.version }}
+          version: ${{ steps.version.outputs.raw_version }}
 
       # Only create release when triggered by a tag push
       - name: Create release

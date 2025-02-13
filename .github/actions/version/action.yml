@@ -2,30 +2,20 @@ name: 'Version Utils'
 description: 'Common version manipulation functions'
 
 inputs:
-  tag:
-    description: 'Git tag to parse'
-    required: true
-  increment:
-    description: 'Calculate next version (none|rc|release)'
-    required: false
-    default: 'none'
   force_version:
-    description: 'Force specific version (overrides increment)'
+    description: 'Force specific version'
     required: false
 
 outputs:
-  version:
-    description: 'Version without v prefix'
+  raw_version:
+    description: 'Current version without v prefix'
     value: ${{ steps.parse.outputs.version }}
-  is_rc:
-    description: 'True if version is RC'
-    value: ${{ steps.parse.outputs.is_rc }}
-  is_release:
-    description: 'True if version is release'
-    value: ${{ steps.parse.outputs.is_release }}
   next_version:
-    description: 'Next version if increment specified'
+    description: 'Next version if one is calculated'
     value: ${{ steps.parse.outputs.next_version }}
+  is_rc:
+    description: 'Whether the version is a release candidate'
+    value: ${{ steps.parse.outputs.is_rc }}
 
 runs:
   using: composite
@@ -36,60 +26,135 @@ runs:
     - id: parse
       shell: bash
       run: |
-        # If input is a ref, get the latest tag
-        if [[ "${{ inputs.tag }}" == refs/* ]] || [[ -z "${{ inputs.tag }}" ]]; then
-          TAG=$(git tag -l 'v*' --sort=-v:refname | while read tag; do
-            if [[ $tag =~ ${{ steps.constants.outputs.version_pattern }} ]]; then
-              echo $tag
-              break
-            fi
-          done)
-        else
-          TAG="${{ inputs.tag }}"
-        fi
+        # Helper to parse version string into components
+        parse_version() {
+          local tag=$1
+          local pattern=$2
+          declare -n ref_major=$3
+          declare -n ref_minor=$4
+          declare -n ref_patch=$5
+          declare -n ref_rc=$6
+          declare -n ref_release=$7
+
+          if [[ $tag =~ $pattern ]]; then
+            ref_major="${BASH_REMATCH[1]}"
+            ref_minor="${BASH_REMATCH[2]}"
+            ref_patch="${BASH_REMATCH[3]}"
+            ref_rc="${BASH_REMATCH[5]}"
+            ref_release="${BASH_REMATCH[6]}"
+            return 0
+          fi
+          return 1
+        }
+
+        # Helper to get latest release version
+        get_latest_release() {
+          git tag -l 'v*-r' --sort=-v:refname | head -n1
+        }
+
+        # Helper to determine version change type between two versions
+        get_change_type() {
+          local v1_major=$1 v1_minor=$2 v1_patch=$3
+          local v2_major=$4 v2_minor=$5 v2_patch=$6
+
+          if [ "$v1_major" -ne "$v2_major" ]; then
+            echo "major"
+          elif [ "$v1_minor" -ne "$v2_minor" ]; then
+            echo "minor"
+          elif [ "$v1_patch" -ne "$v2_patch" ]; then
+            echo "patch"
+          fi
+        }
+
+        # Helper to determine required change from commit
+        get_required_change() {
+          local msg=$1
+          if [[ $msg =~ ^(feature|patch|refactor)!.*$ ]]; then
+            echo "major"
+          elif [[ $msg =~ ^feature.*$ ]]; then
+            echo "minor"
+          elif [[ $msg =~ ^(patch|refactor).*$ ]]; then
+            echo "patch"
+          fi
+        }
+
+        # Get latest version tag
+        TAG=$(git tag -l 'v*' --sort=-v:refname | while read tag; do
+          if [[ $tag =~ ${{ steps.constants.outputs.version_pattern }} ]]; then
+            echo $tag
+            break
+          fi
+        done)
         VERSION="${TAG#v}"
 
-        # Parse version
-        if [[ $TAG =~ ${{ steps.constants.outputs.version_pattern }} ]]; then
-          MAJOR="${BASH_REMATCH[1]}"
-          MINOR="${BASH_REMATCH[2]}"
-          PATCH="${BASH_REMATCH[3]}"
-          RC="${BASH_REMATCH[5]}"
-          RELEASE="${BASH_REMATCH[6]}"
+        # Get current commit message
+        COMMIT_MSG=$(git log -1 --pretty=%B)
 
+        # Parse current version and calculate next
+        if parse_version "$TAG" "${{ steps.constants.outputs.version_pattern }}" MAJOR MINOR PATCH RC RELEASE; then
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-          if [[ $TAG =~ -rc ]]; then
+          # Set is_rc output
+          if [ -n "$RC" ]; then
             echo "is_rc=true" >> $GITHUB_OUTPUT
-            echo "is_release=false" >> $GITHUB_OUTPUT
-          elif [[ $TAG =~ -r ]]; then
-            echo "is_rc=false" >> $GITHUB_OUTPUT
-            echo "is_release=true" >> $GITHUB_OUTPUT
           else
             echo "is_rc=false" >> $GITHUB_OUTPUT
-            echo "is_release=false" >> $GITHUB_OUTPUT
           fi
 
           # Calculate next version if requested
           if [ -n "${{ inputs.force_version }}" ]; then
             NEXT_VERSION="${{ inputs.force_version }}"
+          else
+            REQUIRED_CHANGE=$(get_required_change "$COMMIT_MSG")
+            if [ -n "$REQUIRED_CHANGE" ]; then  # Only proceed if commit needs versioning
+              if [ -n "$RC" ]; then
+                # Get latest release to compare with current RC
+                LAST_RELEASE=$(get_latest_release)
+                if [[ $LAST_RELEASE =~ ${{ steps.constants.outputs.version_pattern }} ]]; then
+                  RELEASE_MAJOR="${BASH_REMATCH[1]}"
+                  RELEASE_MINOR="${BASH_REMATCH[2]}"
+                  RELEASE_PATCH="${BASH_REMATCH[3]}"
 
-          elif [ "${{ inputs.increment }}" = "rc" ]; then
-            if [ -n "$RC" ]; then
-              # Increment RC number: 1.0.0-rc1 -> 1.0.0-rc2
-              NEXT_VERSION="${MAJOR}.${MINOR}.${PATCH}-rc$(($RC + 1))"
-            else
-              # Start new RC series: 1.0.0 -> 1.1.0-rc1
-              NEXT_VERSION="${MAJOR}.$(($MINOR + 1)).0-rc1"
-            fi
+                  # What kind of change does the current RC represent?
+                  CURRENT_CHANGE=$(get_change_type \
+                    "$RELEASE_MAJOR" "$RELEASE_MINOR" "$RELEASE_PATCH" \
+                    "$MAJOR" "$MINOR" "$PATCH")
 
-          elif [ "${{ inputs.increment }}" = "release" ]; then
-            if [ -n "$RC" ]; then
-              # Convert RC to release: 1.0.0-rc2 -> 1.0.0-r
-              NEXT_VERSION="${MAJOR}.${MINOR}.${PATCH}-r"
-            else
-              echo "Can only create release from RC version" >&2
-              exit 1
+                  # Do we need a bigger change than the current RC?
+                  case "$REQUIRED_CHANGE" in
+                    major)
+                      if [ "$CURRENT_CHANGE" != "major" ]; then
+                        NEXT_VERSION="$(($MAJOR + 1)).0.0-rc1"
+                      else
+                        NEXT_VERSION="${MAJOR}.${MINOR}.${PATCH}-rc$(($RC + 1))"
+                      fi
+                      ;;
+                    minor)
+                      if [ "$CURRENT_CHANGE" = "patch" ]; then
+                        NEXT_VERSION="${MAJOR}.$(($MINOR + 1)).0-rc1"
+                      else
+                        NEXT_VERSION="${MAJOR}.${MINOR}.${PATCH}-rc$(($RC + 1))"
+                      fi
+                      ;;
+                    *)
+                      NEXT_VERSION="${MAJOR}.${MINOR}.${PATCH}-rc$(($RC + 1))"
+                      ;;
+                  esac
+                fi
+              else
+                # No RC - start new series based on type
+                case "$REQUIRED_CHANGE" in
+                  major)
+                    NEXT_VERSION="$(($MAJOR + 1)).0.0-rc1"
+                    ;;
+                  minor)
+                    NEXT_VERSION="${MAJOR}.$(($MINOR + 1)).0-rc1"
+                    ;;
+                  patch)
+                    NEXT_VERSION="${MAJOR}.${MINOR}.$(($PATCH + 1))-rc1"
+                    ;;
+                esac
+              fi
             fi
           fi
 
