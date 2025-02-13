@@ -36,6 +36,7 @@ runs:
     - id: parse
       shell: bash
       run: |
+        # If input is a ref, get the latest tag
         if [[ "${{ inputs.tag }}" == refs/* ]] || [[ -z "${{ inputs.tag }}" ]]; then
           TAG=$(git tag -l 'v*' --sort=-v:refname | while read tag; do
             if [[ $tag =~ ${{ steps.constants.outputs.version_pattern }} ]]; then
