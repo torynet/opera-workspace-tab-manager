@@ -30,19 +30,26 @@ outputs:
 runs:
   using: composite
   steps:
+    - uses: ./.github/actions/constants
+      id: constants
+
     - id: parse
       shell: bash
       run: |
-        # If input is a ref, get the latest tag
         if [[ "${{ inputs.tag }}" == refs/* ]] || [[ -z "${{ inputs.tag }}" ]]; then
-          TAG=$(git tag -l 'v*' --sort=-v:refname | head -n1)
+          TAG=$(git tag -l 'v*' --sort=-v:refname | while read tag; do
+            if [[ $tag =~ ${{ steps.constants.outputs.version_pattern }} ]]; then
+              echo $tag
+              break
+            fi
+          done)
         else
           TAG="${{ inputs.tag }}"
         fi
         VERSION="${TAG#v}"
 
         # Parse version
-        if [[ $TAG =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)(-rc([0-9]+)|(-r))?$ ]]; then
+        if [[ $TAG =~ ${{ steps.constants.outputs.version_pattern }} ]]; then
           MAJOR="${BASH_REMATCH[1]}"
           MINOR="${BASH_REMATCH[2]}"
           PATCH="${BASH_REMATCH[3]}"
