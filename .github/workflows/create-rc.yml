@@ -87,12 +87,17 @@ jobs:
         run: |
           VERSION="${{ steps.version.outputs.next_version }}"
 
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
-          git add manifest.json metadata.json persona.ini
-          git commit -m "chore: Version maintenance: Sync version and update release notes for $VERSION"
-          git push origin HEAD
+          # Check if we have any changes to commit
+          if git status --porcelain; then
+            git config user.name "GitHub Actions"
+            git config user.email "actions@github.com"
+            git add -A
+            git commit -m "chore: Version maintenance: Sync version and update release notes for $VERSION"
+            git push origin HEAD
+          else
+            echo "No changes to commit"
+          fi
 
-          # Create tag on the version maintenance commit
+          # Create tag on the current commit
           git tag -a "v$VERSION" -m "Release candidate v$VERSION"
           git push origin "v$VERSION"
