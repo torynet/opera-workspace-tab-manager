@@ -87,10 +87,12 @@ jobs:
         run: |
           VERSION="${{ steps.version.outputs.next_version }}"
 
+          # Set git identity (needed for both commits and tags)
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+
           # Check if we have any changes to commit
           if [ -n "$(git status --porcelain)" ]; then
-            git config user.name "GitHub Actions"
-            git config user.email "actions@github.com"
             git add -A
             git commit -m "chore: Version maintenance: Sync version and update release notes for $VERSION"
             git push origin HEAD
