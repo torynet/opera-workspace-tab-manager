@@ -20,7 +20,8 @@ Instead of having to manually drag individual tabs around, you can move all tabs
 
 - [Development Guide](development/index.md)
 - [Architecture Overview](development/architecture.md)
-- [Contributing Guidelines](development/contributing.md)
+  - [Flow Diagrams](development/diagrams.md)
+- [Contribution Guidelines](development/contributing.md)
 - [Maintenance Guide](development/maintenance.md)
 - [Publishing Guide](development/publishing.md)
 
