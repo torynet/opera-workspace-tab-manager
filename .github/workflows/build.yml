@@ -6,8 +6,7 @@ permissions:
 on:
   push:
     tags:
-      - 'v*-rc*'  # Matches RC tags like v1.0.0-rc1
-      - 'v*-r'    # Matches release tags like v1.0.0-r
+      - 'v*'       # Matches all version tags tags like v1.0.0 or v1.0.0-rc1
 
 jobs:
   build:
