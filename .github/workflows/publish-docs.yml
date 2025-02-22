@@ -5,8 +5,8 @@ on:
   # Runs on pushes of release tags
   push:
     tags:
-      - 'v[0-9]*.*.*'  # Matches release tags like v1.0.0
-      - '!v*-rc*'      # Excludes RC tags
+      - 'v*'  # Matches all version tags like v1.0.0
+      - '!v*-rc*'  # Excludes RC tags
 
   # Allows manual trigger
   workflow_dispatch:
