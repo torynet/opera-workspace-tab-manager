@@ -39,13 +39,20 @@ jobs:
       - name: Update manifest and persona version
         run: |
           VERSION="${{ steps.version.outputs.next_version }}"
-          # Update manifest.json version
-          jq --arg ver "$VERSION" '.version = $ver' manifest.json > manifest.json.tmp
-          mv manifest.json.tmp manifest.json
 
-          # Update persona.ini versions
-          sed -i -E 's/^Version=.*/Version='"$VERSION"'/' persona.ini
-          sed -i -E '/^\[Opera\]/,/^\[/ s/^Version=.*/Version='"$VERSION"'/' persona.ini
+          # Only update versions if this is first RC (rc1) of a new version
+          if [[ "$VERSION" =~ -rc1$ ]]; then
+            # Get base version without RC suffix
+            BASE_VERSION=$(echo $VERSION | sed -E 's/-rc[0-9]+$//')
+
+            # Update manifest.json version
+            jq --arg ver "$BASE_VERSION" '.version = $ver' manifest.json > manifest.json.tmp
+            mv manifest.json.tmp manifest.json
+
+            # Update persona.ini versions
+            sed -i -E 's/^Version=.*/Version='"$BASE_VERSION"'/' persona.ini
+            sed -i -E '/^\[Opera\]/,/^\[/ s/^Version=.*/Version='"$BASE_VERSION"'/' persona.ini
+          fi
 
       - name: Generate store release notes
         id: release_notes
@@ -80,12 +87,19 @@ jobs:
         run: |
           VERSION="${{ steps.version.outputs.next_version }}"
 
+          # Set git identity (needed for both commits and tags)
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
-          git add manifest.json metadata.json persona.ini
-          git commit -m "chore: Version maintenance: Sync version and update release notes for $VERSION"
-          git push origin HEAD
 
-          # Create tag on the version maintenance commit
+          # Check if we have any changes to commit
+          if [ -n "$(git status --porcelain)" ]; then
+            git add -A
+            git commit -m "chore: Version maintenance: Sync version and update release notes for $VERSION"
+            git push origin HEAD
+          else
+            echo "No changes to commit"
+          fi
+
+          # Create tag on the current commit
           git tag -a "v$VERSION" -m "Release candidate v$VERSION"
           git push origin "v$VERSION"
