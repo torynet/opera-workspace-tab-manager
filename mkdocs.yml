@@ -11,11 +11,12 @@ theme:
 nav:
   - Home: index.md
   - User Guide:
-    - Installation & Configuration: user/config.md
-    - Usage Guide: user/usage.md
-  - Development Guide: development/index.md
-    - Architecture: development/architecture.md
+      - Installation & Configuration: user/config.md
+      - Usage Guide: user/usage.md
+  - Development Guide:
+      - Overview: development/index.md
+      - Architecture: development/architecture.md
       - Flow Diagrams: development/diagrams.md
-    - Contribution Guidelines: development/contributing.md
-    - Maintenance Guide: development/maintenance.md
-    - Publishing Guide: development/publishing.md
+      - Contribution Guidelines: development/contributing.md
+      - Maintenance Guide: development/maintenance.md
+      - Publishing Guide: development/publishing.md
