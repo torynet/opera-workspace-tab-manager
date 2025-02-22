@@ -1,3 +1,5 @@
+[Home](../index.md) > [Development](index.md) > Contribution Guidelines
+
 # Contributing to Workspace Tab Manager
 
 Thank you for your interest in contributing! This document outlines the process for contributing to this project.

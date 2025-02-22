@@ -1,4 +1,8 @@
+[Home](../index.md) > Development Guide
+
 # Development Guide
+
+[![Version](https://img.shields.io/github/v/release/torynet/opera-workspace-tab-manager?include_prereleases&label=version)](https://github.com/torynet/opera-workspace-tab-manager/releases)
 
 ## Overview
 
@@ -6,9 +10,12 @@ This extension is built using vanilla JavaScript and Chrome Extension APIs, maki
 
 ## Quick Start
 
-1. [Set up your development environment](setup.md)
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/torynet/opera-workspace-tab-manager.git
+   ```
 2. Review the [architecture documentation](architecture.md)
-3. Follow our [testing guidelines](testing.md)
+3. Follow our [contribution guidelines](contributing.md)
 
 ## Project Structure
 
@@ -23,7 +30,7 @@ This extension is built using vanilla JavaScript and Chrome Extension APIs, maki
 ## Development Workflow
 
 1. Make changes in a feature branch
-2. Test thoroughly using the [testing guidelines](testing.md)
+2. Test thoroughly
 3. Update documentation as needed
 4. Submit a pull request
 
