@@ -16,10 +16,9 @@ Instead of having to manually drag individual tabs around, you can move all tabs
 
 ## For Developers
 
+- [Development Guide](development/index.md)
 - [Architecture Overview](development/architecture.md)
 - [Contributing Guidelines](development/contributing.md)
-- [Development Guide](development/development.md)
-- [Testing Guidelines](development/testing.md)
 - [Maintenance Guide](development/maintenance.md)
 - [Publishing Guide](development/publishing.md)
 

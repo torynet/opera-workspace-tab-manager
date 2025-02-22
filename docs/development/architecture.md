@@ -1,3 +1,5 @@
+[Home](../index.md) > [Development](index.md) > Architecture Overview
+
 # Architecture Overview
 
 The Workspace Tab Manager extension is built with a focus on reliable tab movement and workspace management.

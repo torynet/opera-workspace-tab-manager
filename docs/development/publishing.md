@@ -1,3 +1,5 @@
+[Home](../index.md) > [Development](index.md) > Publishing Guide
+
 # Publishing to Opera Add-ons
 
 This document outlines the steps to publish the Workspace Tab Manager extension to the Opera add-ons store.

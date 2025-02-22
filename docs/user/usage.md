@@ -1,8 +1,10 @@
+[Home](../index.md) > User Guide
+
 # Using Workspace Tab Manager
 
 ## Basic Usage
 
-![Extension Popup](../images/popup.png)
+![Extension popup showing workspace windows list with tab counts and undo/redo buttons](../images/popup.png)
 
 1. Click the extension icon in your browser toolbar
 2. Select your desired destination window from the list

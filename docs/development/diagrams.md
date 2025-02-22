@@ -1,3 +1,5 @@
+[Home](../index.md) > [Development](index.md) > Flow Diagrams
+
 # Tab Movement Architecture
 
 This diagram shows the flow of window content movement operations:
