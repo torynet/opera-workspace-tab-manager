@@ -1,5 +1,7 @@
 # Workspace Tab Manager
 
+[![Version](https://img.shields.io/github/v/release/torynet/opera-workspace-tab-manager?label=version)](https://github.com/torynet/opera-workspace-tab-manager/releases)
+
 A browser extension for Opera that makes workspaces more powerful by letting you move tabs between windows with two clicks.
 
 ## Features
