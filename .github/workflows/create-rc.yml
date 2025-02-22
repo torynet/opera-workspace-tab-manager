@@ -39,13 +39,20 @@ jobs:
       - name: Update manifest and persona version
         run: |
           VERSION="${{ steps.version.outputs.next_version }}"
-          # Update manifest.json version
-          jq --arg ver "$VERSION" '.version = $ver' manifest.json > manifest.json.tmp
-          mv manifest.json.tmp manifest.json
 
-          # Update persona.ini versions
-          sed -i -E 's/^Version=.*/Version='"$VERSION"'/' persona.ini
-          sed -i -E '/^\[Opera\]/,/^\[/ s/^Version=.*/Version='"$VERSION"'/' persona.ini
+          # Only update versions if this is first RC (rc1) of a new version
+          if [[ "$VERSION" =~ -rc1$ ]]; then
+            # Get base version without RC suffix
+            BASE_VERSION=$(echo $VERSION | sed -E 's/-rc[0-9]+$//')
+
+            # Update manifest.json version
+            jq --arg ver "$BASE_VERSION" '.version = $ver' manifest.json > manifest.json.tmp
+            mv manifest.json.tmp manifest.json
+
+            # Update persona.ini versions
+            sed -i -E 's/^Version=.*/Version='"$BASE_VERSION"'/' persona.ini
+            sed -i -E '/^\[Opera\]/,/^\[/ s/^Version=.*/Version='"$BASE_VERSION"'/' persona.ini
+          fi
 
       - name: Generate store release notes
         id: release_notes
