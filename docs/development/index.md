@@ -37,7 +37,8 @@ This extension is built using vanilla JavaScript and Chrome Extension APIs, maki
 ## Resources
 
 - [Architecture Overview](architecture.md)
-- [Contributing Guidelines](contributing.md)
+  - [Flow Diagrams](diagrams.md)
+- [Contribution Guidelines](contributing.md)
 - [Maintenance Guide](maintenance.md)
 - [Publishing Process](publishing.md)
 - [Opera Extensions Documentation](https://dev.opera.com/extensions/)

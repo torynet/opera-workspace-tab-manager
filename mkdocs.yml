@@ -1,0 +1,21 @@
+site_name: Extension Documentation
+docs_dir: docs
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - search.highlight
+
+nav:
+  - Home: index.md
+  - User Guide:
+    - Installation & Configuration: user/config.md
+    - Usage Guide: user/usage.md
+  - Development Guide: development/index.md
+    - Architecture: development/architecture.md
+      - Flow Diagrams: development/diagrams.md
+    - Contribution Guidelines: development/contributing.md
+    - Maintenance Guide: development/maintenance.md
+    - Publishing Guide: development/publishing.md
