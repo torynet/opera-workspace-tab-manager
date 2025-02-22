@@ -88,7 +88,7 @@ jobs:
           VERSION="${{ steps.version.outputs.next_version }}"
 
           # Check if we have any changes to commit
-          if git status --porcelain; then
+          if [ -n "$(git status --porcelain)" ]; then
             git config user.name "GitHub Actions"
             git config user.email "actions@github.com"
             git add -A
