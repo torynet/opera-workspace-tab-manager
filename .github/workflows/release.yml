@@ -31,7 +31,7 @@ jobs:
       - name: Create release tag
         run: |
           VERSION="${{ steps.latest.outputs.tag }}"
-          RELEASE_VERSION="${VERSION%-rc*}-r"
+          RELEASE_VERSION="${VERSION%-rc*}"
           git tag "$RELEASE_VERSION"
           git push origin "$RELEASE_VERSION"
           echo "Created release tag: $RELEASE_VERSION"
