@@ -60,3 +60,23 @@ async function logWindowInfo(){
   const currWindow = await chrome.windows.getCurrent();
   debugLog('Current window:', currWindow);
 }
+
+// Create context menu items when extension is installed
+chrome.runtime.onInstalled.addListener(() => {
+  chrome.contextMenus.create({
+    id: 'wtm-docs',
+    title: 'Documentation',
+    contexts: ['action'],  // 'action' means extension icon context menu
+    type: 'normal'
+  });
+});
+
+// Handle context menu clicks
+chrome.contextMenus.onClicked.addListener((info) => {
+  if (info.menuItemId === 'wtm-docs') {
+    // Open the user guide in a new tab
+    chrome.tabs.create({
+      url: 'https://torynet.github.io/opera-workspace-tab-manager/user/usage/'
+    });
+  }
+});

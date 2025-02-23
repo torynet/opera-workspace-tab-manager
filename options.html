@@ -47,6 +47,34 @@
       cursor: help;
       vertical-align: middle;
     }
+    .docs-links {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid #666;
+    }
+
+    .docs-links a {
+      color: #4285f4;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 8px 0;
+    }
+
+    .docs-links a:hover {
+      text-decoration: underline;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .docs-links a {
+        color: #81c784;
+      }
+    }
+
+    .docs-links .material-icons {
+      font-size: 20px;
+    }
   </style>
 </head>
 <body>
@@ -87,6 +115,25 @@
       <input type="checkbox" id="debugMode">
       Enable Debug Logging
     </label>
+  </div>
+  <div class="docs-links">
+    <h2>Documentation</h2>
+    <a href="https://torynet.github.io/opera-workspace-tab-manager/user/usage/" target="_blank">
+      <i class="material-icons">menu_book</i>
+      User Guide
+    </a>
+    <a href="https://torynet.github.io/opera-workspace-tab-manager/user/config/" target="_blank">
+      <i class="material-icons">settings</i>
+      Configuration Guide
+    </a>
+    <a href="https://torynet.github.io/opera-workspace-tab-manager/privacy/" target="_blank">
+      <i class="material-icons">privacy_tip</i>
+      Privacy Policy
+    </a>
+    <a href="https://github.com/torynet/opera-workspace-tab-manager/issues" target="_blank">
+      <i class="material-icons">bug_report</i>
+      Report an Issue
+    </a>
   </div>
   <script src="options.js"></script>
 </body>
