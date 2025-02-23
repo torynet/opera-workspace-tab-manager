@@ -11,10 +11,16 @@ This extension makes Opera's workspace feature more powerful by letting you easi
 
 Instead of having to manually drag individual tabs around, you can move all tabs from one window to another instantly. This makes workspaces more flexible and practical, especially when working across multiple monitors or reorganizing your workflow.
 
+## Open Source
+
+This is an open source extension. We welcome contributions from the community! Whether it's bug fixes, feature improvements, or documentation updates, check out our [Development Guide](development/index.md) to get started.
+
 ## For Users
 
 - [Installation & Configuration Guide](user/config.md)
 - [Usage Guide](user/usage.md)
+- [Privacy Policy](privacy.md)
+- [License](license.md)
 
 ## For Developers
 

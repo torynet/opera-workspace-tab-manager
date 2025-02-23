@@ -48,3 +48,5 @@ The popup shows:
 1. Moving workspace to different monitor
 2. Combining multiple workspaces
 3. Be able to more effectively use workspaces, because they are not stuck in the window they are in unless you round them up and mouse drag them around
+
+> **Note**: All of these behaviors can be customized in the [Configuration Guide](config.md), including Speed Dial handling, undo timeout, and window focus behavior.

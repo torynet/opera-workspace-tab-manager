@@ -1,5 +1,8 @@
-site_name: Extension Documentation
+site_name: Workspace Tab Manager
 docs_dir: docs
+site_url: https://torynet.github.io/opera-workspace-tab-manager/
+repo_url: https://github.com/torynet/opera-workspace-tab-manager
+repo_name: torynet/opera-workspace-tab-manager
 theme:
   name: material
   features:
@@ -7,12 +10,21 @@ theme:
     - navigation.sections
     - navigation.expand
     - search.highlight
+    - toc.follow     # Auto-scroll TOC while reading
+    - toc.integrate  # Integrate TOC into navigation
+
+markdown_extensions:
+  - toc:
+      permalink: true    # Add anchors to headings
+      toc_depth: 3      # Show up to h3 in TOC
 
 nav:
   - Home: index.md
   - User Guide:
       - Installation & Configuration: user/config.md
       - Usage Guide: user/usage.md
+      - Privacy Policy: privacy.md
+      - License: license.md
   - Development Guide:
       - Overview: development/index.md
       - Architecture: development/architecture.md
