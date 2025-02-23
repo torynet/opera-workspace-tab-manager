@@ -2,31 +2,7 @@
 
 # Publishing to Opera Add-ons
 
-This document outlines the steps to publish the Workspace Tab Manager extension to the Opera add-ons store.
-
-## Initial Submission
-
-1. Create a developer account:
-   - Visit [Opera Add-ons Developer Dashboard](https://addons.opera.com/developer/)
-   - Sign up for a developer account if you don't have one
-   - Verify your email address
-
-2. Submit your extension:
-   - Log into the [Developer Dashboard](https://addons.opera.com/developer/)
-   - Click "Upload New Package"
-   - Fill in required information:
-     - Title: "Workspace Tab Manager"
-     - Category: "Productivity"
-     - Language: English
-     - Description: Copy from README.md
-     - At least 1-3 screenshots of the extension in use
-     - Privacy policy (if you collect any user data)
-     - Support email address
-
-3. Wait for review:
-   - Opera's review team will check your extension
-   - Review typically takes 2-7 business days
-   - You'll receive an email when approved or if changes are needed
+This document outlines the steps to publish updates to the Workspace Tab Manager extension.
 
 ## Version Updates
 
