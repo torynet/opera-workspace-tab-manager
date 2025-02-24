@@ -194,20 +194,35 @@ async function reverseLastMove(lastMove) {
 
 // This is where the real action takes place. Selecting & moving tabs.
 async function resolveTabsToMove(sourceWindowId) {
-  const sourceTabs = await chrome.tabs.query({ windowId: sourceWindowId });
-  return sourceTabs.filter(tab =>
-    tab.id !== workspacePreservationTabId
-    &&
-    (window.options.ignoreSpeedDials ? !tab.url.startsWith(SPEED_DIAL_URL) : true)
-  );
+  try {
+    const sourceTabs = await chrome.tabs.query({ windowId: sourceWindowId });
+    return sourceTabs.filter(tab =>
+      tab.id !== workspacePreservationTabId
+      &&
+      (window.options.ignoreSpeedDials ? !tab.url.startsWith(SPEED_DIAL_URL) : true)
+    );
+  } catch (error) {
+    debugLog('Error in resolveTabsToMove:', error);
+    debugLog('Could not resolve tabs to move.');
+    throw error;
+  }
 }
 async function moveTabsToWindow(sourceWindowId, tabsToMove, targetWindowId) {
-  if (tabsToMove.length === 0) return;
-  await chrome.tabs.move(tabsToMove.map(t => t.id), {
-    windowId: targetWindowId,
-    index: -1
-  });
-  await storeMove(sourceWindowId, targetWindowId);
+  try {
+    debugLog('Moving tabs to window:', tabsToMove);
+    if (tabsToMove.length === 0) return;
+    await chrome.tabs.move(tabsToMove.map(t => t.id), {
+      windowId: targetWindowId,
+      index: -1
+    });
+    await storeMove(sourceWindowId, targetWindowId);
+    debugLog('Moved tabs to window:', tabsToMove);
+    return;
+  } catch (error) {
+    debugLog('Error in moveTabsToWindow:', error);
+    debugLog('Tabs not moved.');
+    throw error;
+  }
 }
 
 
@@ -226,14 +241,23 @@ async function getLastMove() {
   return lastMove;
 }
 async function storeMove(sourceWindowId, targetWindowId) {
-  await chrome.storage.session.set({
-    lastMove: {
-      timestamp: Date.now(),
-      sourceWindowId,
-      targetWindowId,
-      isRedo: false
-    }
-  });
+  debugLog('Store move:', { sourceWindowId, targetWindowId });
+  try {
+    const moveData = {
+      lastMove: {
+        timestamp: Date.now(),
+        sourceWindowId,
+        targetWindowId,
+        isRedo: false
+      }
+    };
+    await chrome.storage.session.set(moveData);
+    debugLog('Move stored.');
+  } catch (error) {
+    debugLog('Error in storeMove:', error);
+    debugLog('Failed to store move data.');
+    throw error;
+  }
 }
 
 
@@ -246,50 +270,88 @@ async function resolveDestinationWindow(targetWindowId) {
   return targetWindowId;
 }
 async function preserveWorkspaceIfEnabledAndNeeded(windowId) {
-  if (window.options.preserveWorkspaces) {
-    const tabs = await chrome.tabs.query({ windowId: windowId });
-    const hasSpeedDial = tabs.some(tab => tab.url.startsWith(SPEED_DIAL_URL));
-    if (!hasSpeedDial) {
-      const tab = await chrome.tabs.create({
-        url: SPEED_DIAL_URL,
-        windowId: windowId
-      });
-      workspacePreservationTabId = tab.id;
-    }
+  try {
+    debugLog('Preserve workspace?');
+    if (!window.options.preserveWorkspaces) return;
+    await createPreservationTab(windowId);
+  } catch (error) {
+    debugLog('Error in preserveWorkspaceIfEnabledAndNeeded:', error);
+    debugLog('Workspace preservation tab creation failed.');
+    throw error;
   }
 }
-async function cleanupSpeedDialTabsIfEnabled(sourceWindowId, targetWindowId) {
-  if (window.options.cleanSpeedDials) {
-    const sourceTabs = await chrome.tabs.query({ windowId: sourceWindowId });
-    const sourceSpeedDials = sourceTabs.filter(tab =>
-      tab.url.startsWith(SPEED_DIAL_URL) &&
-      tab.id !== workspacePreservationTabId
-    );
-    if (sourceSpeedDials.length > 1) {
-      const tabsToClose = sourceSpeedDials.slice(1).map(tab => tab.id);
-      await chrome.tabs.remove(tabsToClose);
+async function shouldCreatePreservationTab(windowId) {
+  if (!window.options.preserveWorkspaces) return false;
+  // If there is no existing speed dial, create a preservation tab.
+  if(await !hasSpeedDial(windowId)) return true;
+  // If we're not ignoring speed dials, create a preservation tab.
+  return !window.options.ignoreSpeedDials;
+}
+async function hasSpeedDial(windowId) {
+  return getSpeedDialTabs(windowId).then(hasTabs);
+}
+function hasTabs(tabs) {
+  return tabs.length > 0;
+}
+async function getSpeedDialTabs(windowId) {
+  const tabs = await chrome.tabs.query({ windowId: windowId });
+  return tabs.filter(tab => tab.url.startsWith(SPEED_DIAL_URL));
+}
+async function createPreservationTab(windowId) {
+  const tab = await chrome.tabs.create({
+    url: SPEED_DIAL_URL,
+    windowId: windowId
+  });
+  workspacePreservationTabId = tab.id;
+  debugLog('Created preservation tab:', tab.id);
+}
+async function cleanupSpeedDialTabsIfEnabled(sourceWindowId, destinationWindowId) {
+  try {
+    if (!window.options.cleanSpeedDials) return;
+    debugLog('Cleanup: Starting cleanup');
+    const sourceSpeedDials = await getSpeedDialTabs(sourceWindowId);
+    const destSpeedDials = await getSpeedDialTabs(destinationWindowId);
+    debugLog('Cleanup: Source speed dials:', sourceSpeedDials);
+    debugLog('Cleanup: Destination speed dials:', destSpeedDials);
+    const tabIdsToClose = [
+      ...sourceSpeedDials.slice(1),
+      ...destSpeedDials.slice(1)
+    ].map(tab => tab.id);
+    debugLog('Cleanup: Tab IDs to close:', tabIdsToClose);
+    if (tabIdsToClose.length > 0) {
+      await chrome.tabs.remove(tabIdsToClose);
+      debugLog('Cleanup: Tabs closed');
+    } else {
+      debugLog('Cleanup: No tabs to close');
     }
-    if (targetWindowId !== 'new') {
-      const destTabs = await chrome.tabs.query({ windowId: targetWindowId });
-      const destSpeedDials = destTabs.filter(tab =>
-        tab.url.startsWith(SPEED_DIAL_URL) &&
-        tab.id !== workspacePreservationTabId
-      );
-      if (destSpeedDials.length > 1) {
-        const tabsToClose = destSpeedDials.slice(1).map(tab => tab.id);
-        await chrome.tabs.remove(tabsToClose);
-      }
-    }
+  } catch (error) {
+    debugLog('Error in cleanupSpeedDialTabsIfEnabled:', error);
+    debugLog('Cleanup failed.');
+    throw error;
   }
 }
 function closePopupIfNeeded() {
-  if (window.location.protocol === 'chrome-extension:') {
-    window.close();
+  try {
+    if (window.location.protocol === 'chrome-extension:') {
+      debugLog('Closing popup');
+      window.close();
+    }
+  } catch (error) {
+    debugLog('Error in closePopupIfNeeded:', error);
+    debugLog('Popup not closed.');
+    throw error;
   }
 }
 async function focusDestinationIfEnabled(windowId) {
-  if (window.options.focusDestination) {
-    await chrome.windows.update(windowId, { focused: true });
+  try {
+    if (window.options.focusDestination) {
+        debugLog('Focusing destination');
+        await chrome.windows.update(windowId, { focused: true });
+    }
+  } catch (error) {
+    debugLog('Error in focusDestinationIfEnabled:', error);
+    debugLog('Destination window not focused.');
+    throw error;
   }
 }
 async function getOptions() {
@@ -304,7 +366,7 @@ async function getOptions() {
   console.log('Options retrieved:', options);
   return options;
 }
-async function debugLog(...args) {
+function debugLog(...args) {
   if (window.options.debugMode) {
     chrome.runtime.sendMessage({
       type: 'debugLog',
