@@ -1,4 +1,4 @@
-const SPEED_DIAL_URL = 'chrome://startpage';
+import { SPEED_DIAL_URL, getSpeedDialTabs } from './shared.js';
 let workspacePreservationTabId = null;
 let undoCountdownInterval = null;
 
@@ -143,8 +143,8 @@ async function handleTargetWindowSelection(currentWindow, targetWindowId) {
     await preserveWorkspaceIfEnabledAndNeeded(currentWindow.id);
     const tabsToMove = await resolveTabsToMove(currentWindow.id);
     await moveTabsToWindow(currentWindow.id, tabsToMove, destinationWindowId);
-    await cleanupSpeedDialTabsIfEnabled(currentWindow.id, destinationWindowId);
     await focusDestinationIfEnabled(destinationWindowId);
+    await cleanupSpeedDialTabsIfEnabled(currentWindow.id, destinationWindowId);
     closePopupIfNeeded();
   } catch (error) {
     console.error('Error during tab movement:', error);
@@ -158,15 +158,14 @@ async function handleUndoToggle() {
   const undoButton = document.querySelector('.undo-option');
   const lastMove = await getLastMove();
   if (!lastMove) return;
-
   try {
     undoButton.classList.add('loading');
     undoButton.textContent = lastMove.isRedo ? 'Redoing...' : 'Undoing...';
-
-    await preserveWorkspaceIfEnabledAndNeeded(lastMove.sourceWindowId);
+    const { sourceWindowId, destinationWindowId } = determineUndoRedoSourceAndDestinationWindowIds(lastMove);
+    await preserveWorkspaceIfEnabledAndNeeded(sourceWindowId);
     await reverseLastMove(lastMove);
-    await cleanupSpeedDialTabsIfEnabled(lastMove.sourceWindowId, lastMove.targetWindowId);
-    await focusDestinationIfEnabled(lastMove.isRedo ? lastMove.targetWindowId : lastMove.sourceWindowId);
+    await focusDestinationIfEnabled(destinationWindowId);
+    await cleanupSpeedDialTabsIfEnabled(sourceWindowId, destinationWindowId);
     closePopupIfNeeded();
   } catch (error) {
     console.error('Error during move:', error);
@@ -174,6 +173,12 @@ async function handleUndoToggle() {
     undoButton.classList.remove('loading');
     updateUndoRedoButton();
   }
+}
+function determineUndoRedoSourceAndDestinationWindowIds(lastMove) {
+  return {
+    sourceWindowId: lastMove.isRedo ? lastMove.sourceWindowId : lastMove.targetWindowId,
+    destinationWindowId: lastMove.isRedo ? lastMove.targetWindowId : lastMove.sourceWindowId
+  };
 }
 async function reverseLastMove(lastMove) {
   const tabsToMove = await resolveTabsToMove(lastMove.isRedo ? lastMove.sourceWindowId : lastMove.targetWindowId);
@@ -272,7 +277,7 @@ async function resolveDestinationWindow(targetWindowId) {
 async function preserveWorkspaceIfEnabledAndNeeded(windowId) {
   try {
     debugLog('Preserve workspace?');
-    if (!window.options.preserveWorkspaces) return;
+    if (!await shouldCreatePreservationTab(windowId)) return;
     await createPreservationTab(windowId);
   } catch (error) {
     debugLog('Error in preserveWorkspaceIfEnabledAndNeeded:', error);
@@ -283,52 +288,33 @@ async function preserveWorkspaceIfEnabledAndNeeded(windowId) {
 async function shouldCreatePreservationTab(windowId) {
   if (!window.options.preserveWorkspaces) return false;
   // If there is no existing speed dial, create a preservation tab.
-  if(await !hasSpeedDial(windowId)) return true;
+  if (!await hasSpeedDial(windowId)) return true;
   // If we're not ignoring speed dials, create a preservation tab.
   return !window.options.ignoreSpeedDials;
 }
-async function hasSpeedDial(windowId) {
+function hasSpeedDial(windowId) {
   return getSpeedDialTabs(windowId).then(hasTabs);
 }
 function hasTabs(tabs) {
   return tabs.length > 0;
 }
-async function getSpeedDialTabs(windowId) {
-  const tabs = await chrome.tabs.query({ windowId: windowId });
-  return tabs.filter(tab => tab.url.startsWith(SPEED_DIAL_URL));
-}
 async function createPreservationTab(windowId) {
   const tab = await chrome.tabs.create({
     url: SPEED_DIAL_URL,
-    windowId: windowId
+    windowId: windowId,
+    active: false
   });
   workspacePreservationTabId = tab.id;
   debugLog('Created preservation tab:', tab.id);
 }
 async function cleanupSpeedDialTabsIfEnabled(sourceWindowId, destinationWindowId) {
-  try {
     if (!window.options.cleanSpeedDials) return;
-    debugLog('Cleanup: Starting cleanup');
-    const sourceSpeedDials = await getSpeedDialTabs(sourceWindowId);
-    const destSpeedDials = await getSpeedDialTabs(destinationWindowId);
-    debugLog('Cleanup: Source speed dials:', sourceSpeedDials);
-    debugLog('Cleanup: Destination speed dials:', destSpeedDials);
-    const tabIdsToClose = [
-      ...sourceSpeedDials.slice(1),
-      ...destSpeedDials.slice(1)
-    ].map(tab => tab.id);
-    debugLog('Cleanup: Tab IDs to close:', tabIdsToClose);
-    if (tabIdsToClose.length > 0) {
-      await chrome.tabs.remove(tabIdsToClose);
-      debugLog('Cleanup: Tabs closed');
-    } else {
-      debugLog('Cleanup: No tabs to close');
-    }
-  } catch (error) {
-    debugLog('Error in cleanupSpeedDialTabsIfEnabled:', error);
-    debugLog('Cleanup failed.');
-    throw error;
-  }
+    const success = await chrome.runtime.sendMessage({
+      type: 'cleanupSpeedDials',
+      sourceWindowId,
+      destinationWindowId,
+      options: window.options
+    });
 }
 function closePopupIfNeeded() {
   try {
