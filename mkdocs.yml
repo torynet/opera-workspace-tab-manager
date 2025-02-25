@@ -12,11 +12,20 @@ theme:
     - search.highlight
     - toc.follow     # Auto-scroll TOC while reading
     - toc.integrate  # Integrate TOC into navigation
+    - content.code.copy  # Optional: adds copy button to code blocks
+  toc_depth: 3
 
 markdown_extensions:
   - toc:
       permalink: true    # Add anchors to headings
-      toc_depth: 3      # Show up to h3 in TOC
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+
+extra_javascript:
+  - https://unpkg.com/mermaid@10/dist/mermaid.min.js
 
 nav:
   - Home: index.md
