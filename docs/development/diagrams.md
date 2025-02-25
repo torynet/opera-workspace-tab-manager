@@ -8,11 +8,14 @@ This diagram shows the flow of window content movement operations:
 flowchart TD
     classDef required fill:#90EE90,stroke:#006400,color:#000
     classDef optional fill:#ADD8E6,stroke:#000080,color:#000
+    classDef background fill:#F0F0F0,stroke:#000,color:#000
 
     subgraph Legend[Legend]
         direction TB
         Required[Required Steps]:::required
-        Optional[Optional Steps<br>based on configuration]:::optional
+        Required --- Optional[Optional Steps<br>based on configuration]:::optional
+        Optional --- Background[Background Steps]:::background
+        linkStyle 0,1 stroke:transparent,stroke-width:0
     end
 
     subgraph PL[Popup Loading]
@@ -22,10 +25,8 @@ flowchart TD
         CreateOpt --> UpdateBtn[Update Undo Button]:::required
     end
 
-    PL --> |"User clicks
-            window option"| WR
-    PL --> |"User clicks
-            undo / redo"| UR
+    PL --> |"User clicks<br>window option"| WR
+    PL --> |"User clicks<br>undo / redo"| UR
 
     subgraph Workspace Move
         subgraph WR[Window Resolution]
@@ -55,8 +56,12 @@ flowchart TD
     TM --> PMT
 
     subgraph PMT[Post-Move Tasks]
-        Clean[Clean Speed Dials]:::optional
-        Clean --> Focus[Focus Destination Window]:::optional
-        Focus --> Close[Close Popup]:::required
+        Focus[Focus Destination]:::optional
+        Focus --> Clean[Clean Speed Dials?]:::optional
+        Clean --> Close[Close Popup]:::required
+    end
+
+    subgraph ServiceWorker[Service Worker]
+        Clean --> Cleanup[Cleanup Speed Dials]:::background
     end
 ```
