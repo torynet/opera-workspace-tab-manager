@@ -1,3 +1,4 @@
+import { SPEED_DIAL_URL, getSpeedDialTabs } from './shared.js';
 // Cache debug options at startup
 let debugMode = false;
 
@@ -20,6 +21,15 @@ chrome.tabs.onActivated.addListener(async (tab) => {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'debugLog') {
     debugLog(...message.args);
+  }
+  if (message.type === 'cleanupSpeedDials') {
+    cleanupSpeedDials(message.sourceWindowId, message.destinationWindowId, message.options)
+      .then(() => sendResponse(true))
+      .catch(error => {
+        console.error('Cleanup error:', error);
+        sendResponse(false);
+      });
+    return true; // Keep message channel open for async response
   }
 });
 
@@ -80,3 +90,29 @@ chrome.contextMenus.onClicked.addListener((info) => {
     });
   }
 });
+
+async function cleanupSpeedDials(sourceWindowId, destinationWindowId, options) {
+  try {
+    if (!options.cleanSpeedDials) return;
+    debugLog('Cleanup: Starting cleanup');
+    const sourceSpeedDials = await getSpeedDialTabs(sourceWindowId);
+    const destSpeedDials = await getSpeedDialTabs(destinationWindowId);
+    debugLog('Cleanup: Source speed dials:', sourceSpeedDials);
+    debugLog('Cleanup: Destination speed dials:', destSpeedDials);
+    const tabIdsToClose = [
+      ...sourceSpeedDials.slice(1),
+      ...destSpeedDials.slice(1)
+    ].map(tab => tab.id);
+    debugLog('Cleanup: Tab IDs to close:', tabIdsToClose);
+    if (tabIdsToClose.length > 0) {
+      await chrome.tabs.remove(tabIdsToClose);
+      debugLog('Cleanup: Tabs closed');
+    } else {
+      debugLog('Cleanup: No tabs to close');
+    }
+  } catch (error) {
+    debugLog('Error in cleanupSpeedDials:', error);
+    debugLog('Cleanup failed.');
+    throw error;
+  }
+}
