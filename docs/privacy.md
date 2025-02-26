@@ -1,3 +1,5 @@
+[Home](index.md) > Privacy Policy
+
 # Privacy Policy
 
 Our privacy policy can be found in the [root of our repository](https://github.com/torynet/opera-workspace-tab-manager/blob/main/PRIVACY.md).

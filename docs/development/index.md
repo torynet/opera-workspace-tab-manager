@@ -19,24 +19,24 @@ This extension is built using vanilla JavaScript and Chrome Extension APIs, maki
 ### Building the Extension
 
 1. Clone the repository:
-   ```bash
-   git clone https://github.com/torynet/opera-workspace-tab-manager.git
-   cd opera-workspace-tab-manager
-   ```
+    ```bash
+    git clone https://github.com/torynet/opera-workspace-tab-manager.git
+    cd opera-workspace-tab-manager
+    ```
 
 2. The extension can be loaded directly from the source directory - no build step is required.
 
 3. Optional: Build documentation site
-   ```bash
-   # Install mkdocs-material
-   pip install mkdocs-material
+    ```bash
+    # Install mkdocs-material
+    pip install mkdocs-material
 
-   # Build the docs
-   mkdocs build
+    # Build the docs
+    mkdocs build
 
-   # Or serve locally
-   mkdocs serve
-   ```
+    # Or serve locally
+    mkdocs serve
+    ```
 
 ### Loading in Opera
 
@@ -51,15 +51,21 @@ This extension is built using vanilla JavaScript and Chrome Extension APIs, maki
 ├── popup.html/js        # Extension popup UI
 ├── background.js        # Background service worker
 ├── options.html/js      # Options page
-└── icons/              # Extension icons
+├── shared.js            # Shared code
+├── docs/                # Documentation
+└── icons/               # Extension icons
 ```
 
 ## Development Workflow
 
 1. Make changes in a feature branch
-2. Test thoroughly
-3. Update documentation as needed
-4. Submit a pull request
+2. Keep the code [clean](https://medium.com/@sheyiogundijo/clean-code-in-a-nutshell-ac7aa5f80a99).
+3. Test thoroughly
+4. Update documentation:
+    - Follow the [Documentation Guide](documentation.md)
+    - Update user guides for feature changes
+    - Keep architecture docs current
+5. Submit a pull request
 
 ## Getting Started with Development
 
@@ -71,7 +77,8 @@ Before making changes:
 ## Resources
 
 - [Architecture Overview](architecture.md)
-  - [Flow Diagrams](diagrams.md)
+    - [Flow Diagrams](diagrams.md)
+- [Documentation Guide](documentation.md)
 - [Contribution Guidelines](contributing.md)
 - [Maintenance Guide](maintenance.md)
 - [Publishing Process](publishing.md)

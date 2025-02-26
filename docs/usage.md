@@ -1,13 +1,26 @@
-[Home](../index.md) > User Guide
+[Home](index.md) > Usage Guide
 
 # Using Workspace Tab Manager
 
 ## Basic Usage
 
-![Extension popup showing workspace windows list with tab counts and undo/redo buttons](../images/popup.png)
+1. Click the extension icon in your browser toolbar (top right)
 
-1. Click the extension icon in your browser toolbar
-2. Select your desired destination window from the list
+![Workspace Tab Manager Icon](icons/icon64.png)
+
+??? question "Can't find the icon?"
+    If you don't see the extension icon in Opera:
+
+    - Click the "Extensions" cube :material-cube-outline: icon in the top right corner of the browser
+
+    - Find ![Workspace Tab Manager Icon](icons/icon16.png) "Workspace Tab Manager" in the dropdown list
+
+    - Click the pin :octicons-pin-16: icon next to it, to keep it visible in your toolbar
+
+1. Select your desired destination window from the list
+
+![Extension popup showing workspace windows list with tab counts and undo/redo buttons](images/popup.png)
+
 3. All tabs from your current window will move to the selected window
 
 The popup shows:
