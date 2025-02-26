@@ -21,17 +21,17 @@ See our [detailed flow diagrams](diagrams.md) for a visual representation of:
 ## Key Features
 
 1. **Window Management**
-   - Window-to-window tab movement
-   - New window creation
-   - Window state preservation
+    - Window-to-window tab movement
+    - New window creation
+    - Window state preservation
 
 2. **Speed Dial Handling**
-   - Configurable preservation
-   - Automatic cleanup
+    - Configurable preservation
+    - Automatic cleanup
 
 3. **State Management**
-   - Undo/redo functionality
-   - Movement history tracking
+    - Undo/redo functionality
+    - Movement history tracking
 
 ## Implementation Details
 

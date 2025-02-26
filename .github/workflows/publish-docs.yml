@@ -36,6 +36,11 @@ jobs:
         with:
           python-version: '3.x'
       - run: pip install mkdocs-material
+      - name: Copy symbolic linked assets
+        run: |
+          rm -f docs/icons  # Remove existing symbolic link
+          mkdir -p docs/icons
+          cp -r icons/* docs/icons/
       - run: mkdocs build
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

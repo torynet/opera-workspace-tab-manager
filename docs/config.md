@@ -1,4 +1,4 @@
-[Home](../index.md) > Installation & Configuration Guide
+[Home](index.md) > Installation & Configuration Guide
 
 # Installation
 
@@ -7,39 +7,39 @@
 
 # Configuration Options
 
-![Options panel showing Speed Dial, Undo/Redo, Window behavior and Debug settings](../images/options.png)
+![Options panel showing Speed Dial, Undo/Redo, Window behavior and Debug settings](images/options.png)
 
 ## Speed Dial Handling
 
 - **Add Speed Dials Tabs to Preserve Emptied Workspaces**: Creates a new speed dial tab in the active workspace before moving tabs out, preserving the workspace
-  - Helps maintain workspace identity
-  - Prevents window closure when moving all tabs
-  - Default: ✅ Enabled
+    - Helps maintain workspace identity
+    - Prevents window closure when moving all tabs
+    - Default: ✅ Enabled
 
 - **Ignore Speed Dial Tabs When Moving**: Keeps speed dial tabs in their original window when moving tabs
-  - Prevents speed dial proliferation
-  - Default: ✅ Enabled
+    - Prevents speed dial proliferation
+    - Default: ✅ Enabled
 
 - **Clean Up Duplicate Speed Dial Tabs**: Removes duplicate speed dial tabs after moves
-  - Keeps workspace organization clean
-  - Default: ✅ Enabled
+    - Keeps workspace organization clean
+    - Default: ✅ Enabled
 
 ## Undo/Redo
 
 - **Undo/Redo Timeout**: The number of seconds to wait before automatically undoing or redoing a move
-  - Default: 30 seconds
+    - Default: 30 seconds
 
 ## Window Behavior
 
 - **Focus After Move**: Automatically focus the destination window after moving tabs
-  - Makes workflow smoother when moving between monitors
-  - Default: ✅ Enabled
+    - Makes workflow smoother when moving between monitors
+    - Default: ✅ Enabled
 
 ## Troubleshooting
 
 - **Debug Mode**: Logs detailed information to the console
-  - For development and troubleshooting only
-  - Default: ❌ Disabled
+    - For development and troubleshooting only
+    - Default: ❌ Disabled
 
 **Access these options through:**
 

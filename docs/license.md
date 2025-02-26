@@ -1,3 +1,5 @@
+[Home](index.md) > License
+
 # License
 
 This project is licensed under the [MIT License](https://github.com/torynet/opera-workspace-tab-manager/blob/main/LICENSE).
