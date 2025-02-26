@@ -20,7 +20,7 @@ theme:
 
 markdown_extensions:
   - toc:
-      permalink: true    # Add anchors to headings
+      permalink: true
   - admonition
   - attr_list
   - pymdownx.details
