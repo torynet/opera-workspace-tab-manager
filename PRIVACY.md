@@ -46,7 +46,7 @@ We will update this privacy policy as needed. Major changes will be announced th
 
 If you have questions about this privacy policy, please:
 - Open an issue on our [GitHub repository](https://github.com/torynet/opera-workspace-tab-manager/issues)
-- Or email: [contact@example.com]
+- Or email: [tory@netherton.me]
 
 ## Additional Rights
 
