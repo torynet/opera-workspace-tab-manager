@@ -17,8 +17,8 @@ This is an open source extension. We welcome contributions from the community! W
 
 ## For Users
 
-- [Installation & Configuration Guide](user/config.md)
-- [Usage Guide](user/usage.md)
+- [Installation & Configuration Guide](config.md)
+- [Usage Guide](usage.md)
 - [Privacy Policy](privacy.md)
 - [License](license.md)
 
@@ -26,7 +26,8 @@ This is an open source extension. We welcome contributions from the community! W
 
 - [Development Guide](development/index.md)
 - [Architecture Overview](development/architecture.md)
-  - [Flow Diagrams](development/diagrams.md)
+    - [Flow Diagrams](development/diagrams.md)
+- [Documentation Guide](development/documentation.md)
 - [Contribution Guidelines](development/contributing.md)
 - [Maintenance Guide](development/maintenance.md)
 - [Publishing Guide](development/publishing.md)

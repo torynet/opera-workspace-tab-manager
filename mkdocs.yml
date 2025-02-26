@@ -1,5 +1,4 @@
 site_name: Workspace Tab Manager
-docs_dir: docs
 site_url: https://torynet.github.io/opera-workspace-tab-manager/
 repo_url: https://github.com/torynet/opera-workspace-tab-manager
 repo_name: torynet/opera-workspace-tab-manager
@@ -9,15 +8,25 @@ theme:
     - navigation.tabs
     - navigation.sections
     - navigation.expand
+    - navigation.indexes
+    - navigation.top
+    - navigation.path
+    - navigation.tracking
+    - navigation.instant
     - search.highlight
-    - toc.follow     # Auto-scroll TOC while reading
-    - toc.integrate  # Integrate TOC into navigation
-    - content.code.copy  # Optional: adds copy button to code blocks
+    - toc.follow
+    - content.code.copy
   toc_depth: 3
 
 markdown_extensions:
   - toc:
       permalink: true    # Add anchors to headings
+  - admonition
+  - attr_list
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
   - pymdownx.superfences:
       custom_fences:
         - name: mermaid
@@ -30,14 +39,15 @@ extra_javascript:
 nav:
   - Home: index.md
   - User Guide:
-      - Installation & Configuration: user/config.md
-      - Usage Guide: user/usage.md
+      - Installation & Configuration: config.md
+      - Usage Guide: usage.md
       - Privacy Policy: privacy.md
       - License: license.md
   - Development Guide:
       - Overview: development/index.md
       - Architecture: development/architecture.md
       - Flow Diagrams: development/diagrams.md
+      - Documentation Guide: development/documentation.md
       - Contribution Guidelines: development/contributing.md
       - Maintenance Guide: development/maintenance.md
       - Publishing Guide: development/publishing.md
