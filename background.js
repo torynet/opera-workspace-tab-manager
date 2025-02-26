@@ -94,11 +94,9 @@ chrome.contextMenus.onClicked.addListener((info) => {
 async function cleanupSpeedDials(sourceWindowId, destinationWindowId, options) {
   try {
     if (!options.cleanSpeedDials) return;
-    debugLog('Cleanup: Starting cleanup');
+    debugLog('Cleanup Speed-Dial Tabs');
     const sourceSpeedDials = await getSpeedDialTabs(sourceWindowId);
     const destSpeedDials = await getSpeedDialTabs(destinationWindowId);
-    debugLog('Cleanup: Source speed dials:', sourceSpeedDials);
-    debugLog('Cleanup: Destination speed dials:', destSpeedDials);
     const tabIdsToClose = [
       ...sourceSpeedDials.slice(1),
       ...destSpeedDials.slice(1)
