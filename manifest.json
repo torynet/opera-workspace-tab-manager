@@ -1,11 +1,10 @@
 {
   "manifest_version": 3,
   "name": "Workspace Tab Manager",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Move all tabs from one workspace to another window or a new window",
   "permissions": [
     "tabs",
-    "windows",
     "storage",
     "contextMenus"
   ],

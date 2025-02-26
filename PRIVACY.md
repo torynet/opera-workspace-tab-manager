@@ -31,7 +31,6 @@ This data never leaves your browser and is only used to provide the extension's 
 The extension requires only the minimum permissions needed for tab/window management:
 - `tabs` - To move tabs between windows
 - `storage` - To save your preferences locally
-- `windows` - To manage window operations
 - `contextMenus` - To create a context menu for the extension icon
 
 ## Third-Party Services
