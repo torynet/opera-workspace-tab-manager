@@ -1,6 +1,7 @@
 # Workspace Tab Manager Documentation
 
 [![Version](https://img.shields.io/github/v/release/torynet/opera-workspace-tab-manager?label=version)](https://github.com/torynet/opera-workspace-tab-manager/releases)
+[![License](https://img.shields.io/badge/license-Blue%20Oak-blue)](https://blueoakcouncil.org/license/1.0.0)
 
 This extension makes Opera's workspace feature more powerful by letting you easily move workspace tabs between windows. While Opera's workspaces are great for organizing tabs by topic, they can get stuck in specific windows. This extension solves that by letting you:
 

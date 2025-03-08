@@ -3,6 +3,7 @@
 # Development Guide
 
 [![Version](https://img.shields.io/github/v/release/torynet/opera-workspace-tab-manager?include_prereleases&label=version)](https://github.com/torynet/opera-workspace-tab-manager/releases)
+[![License](https://img.shields.io/badge/license-Blue%20Oak-blue)](https://blueoakcouncil.org/license/1.0.0)
 
 ## Overview
 
