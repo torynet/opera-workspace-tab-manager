@@ -1,6 +1,7 @@
 # Workspace Tab Manager
 
 [![Version](https://img.shields.io/github/v/release/torynet/opera-workspace-tab-manager?label=version)](https://github.com/torynet/opera-workspace-tab-manager/releases)
+[![License](https://img.shields.io/badge/license-Blue%20Oak-blue)](https://blueoakcouncil.org/license/1.0.0)
 
 A browser extension for Opera that makes workspaces more powerful by letting you move tabs between windows with two clicks.
 
@@ -29,4 +30,4 @@ Contributions are welcome! See our [Contributing Guidelines](docs/development/co
 
 ## License
 
-[MIT License](LICENSE)
+[Blue Oak Model License](LICENSE) - a modern, highly permissive license that maximizes reuse while protecting contributors.
