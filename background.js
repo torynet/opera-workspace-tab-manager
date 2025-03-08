@@ -86,7 +86,7 @@ chrome.contextMenus.onClicked.addListener((info) => {
   if (info.menuItemId === 'wtm-docs') {
     // Open the user guide in a new tab
     chrome.tabs.create({
-      url: 'https://torynet.github.io/opera-workspace-tab-manager/user/usage/'
+      url: 'https://torynet.github.io/opera-workspace-tab-manager/usage/'
     });
   }
 });
